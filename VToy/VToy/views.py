@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from datetime import datetime
+from WeiXinHandler import WeiXinHandler
 import os
 
 def hello(request):
@@ -25,3 +26,9 @@ def rtthreadtext(request):
 	ret_msg = {}
 	ret_msg['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	return HttpResponse(str(ret_msg), content_type='application/json')
+
+def handleWXHttpRequest(request):
+    if request.method == 'GET':
+        return HttpResponse(WeiXinHandler.checkSignature(request))
+    elif request.method == 'POST':
+        return HttpResponse(WeiXinHandler.response_msg(request))

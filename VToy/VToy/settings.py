@@ -10,9 +10,15 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import socket
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-RunInCloud = False
+
+if socket.gethostname() == 'iZ23otdlkscZ':
+    RunInCloud = True
+else:
+    RunInCloud = False
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
@@ -62,9 +68,9 @@ if RunInCloud:
             # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'vtoy',
-            'USER': 'vtoyer',
-            'PASSWORD': 'wodemima',
-            'HOST': 'alikidscare.mysql.rds.aliyuncs.com',
+            'USER': 'vtoy',
+            'PASSWORD': 'vtoyvtoy',
+            'HOST': '127.0.0.1',
             'PORT': '3306'
         }
     }
@@ -76,8 +82,8 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'vtoy',
             'USER': 'root',
-            'PASSWORD': 'wodemima',
-            'HOST': '127.0.0.1',
+            'PASSWORD': 'vtoyvtoy',
+            'HOST': '121.40.99.4',
             'PORT': '3306'
         }
     }
@@ -96,7 +102,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'static/templates')
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 

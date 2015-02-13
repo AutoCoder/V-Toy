@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, include, url
-from views import hello, rtthreadtext, rtthreadaudio, rtthreadaudiostream
+from views import hello, rtthreadtext, rtthreadaudio, rtthreadaudiostream, handleWXHttpRequest
 
 from django.contrib import admin
 admin.autodiscover()
@@ -10,4 +10,5 @@ urlpatterns = patterns('',
 	url(r'^rtthreadtext/$', rtthreadtext),
     url(r'^rtthreadaudio/$',rtthreadaudio),
     url(r'^rtthreadaudiostream/$',rtthreadaudiostream),
+    url(r'^$', handleWXHttpRequest), # for weixin handler
 )

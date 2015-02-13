@@ -1,0 +1,8 @@
+<xml>
+<ToUserName><![CDATA[{{ ToUserName }}]]></ToUserName>
+<FromUserName><![CDATA[{{ FromUserName }}]]></FromUserName>
+<CreateTime>{{ createTime }}</CreateTime>
+<MsgType><![CDATA[{{ msgType }}]]></MsgType>
+<Content><![CDATA[{{ content }}]]></Content>
+<FuncFlag>0</FuncFlag>
+</xml>
