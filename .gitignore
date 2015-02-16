@@ -44,3 +44,7 @@ Temporary Items
 
 #Python Build file
 *.pyc
+
+#eclipse project file
+*.project
+*.pydevproject

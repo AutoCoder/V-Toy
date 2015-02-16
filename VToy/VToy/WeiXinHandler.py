@@ -45,12 +45,12 @@ class WeiXinHandler:
                     'msgType' : 'text'
                     })
         
-                    fp = open(TEMPLATE_DIR + '/text_templ')
-                    t = Template(fp.read())
-                    fp.close()
+                fp = open(TEMPLATE_DIR + '/text_templ')
+                t = Template(fp.read())
+                fp.close()
         
-                    xmlReply = t.render(c)
-                    return xmlReply
+                xmlReply = t.render(c)
+                return xmlReply
             else:
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
@@ -60,12 +60,12 @@ class WeiXinHandler:
                     'msgType' : 'text'
                     })
         
-                    fp = open(TEMPLATE_DIR + '/text_templ')
-                    t = Template(fp.read())
-                    fp.close()
-        
-                    xmlReply = t.render(c)
-                    return xmlReply
+                fp = open(TEMPLATE_DIR + '/text_templ')
+                t = Template(fp.read())
+                fp.close()
+    
+                xmlReply = t.render(c)
+                return xmlReply
         except Exception, debuginfo:
             return WeiXinHandler.replydebugforwx(debuginfo, msg)
      
