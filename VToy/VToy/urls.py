@@ -5,10 +5,9 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^hello/$', hello),
-	url(r'^rtthreadtext/$', rtthreadtext),
-    url(r'^rtthreadaudio/$',rtthreadaudio),
-    url(r'^rtthreadaudiostream/$',rtthreadaudiostream),
-    url(r'^$', handleWXHttpRequest), # for weixin handler
+    url(r'^vtoy/admin/', include(admin.site.urls)),
+    url(r'^vtoy/hello/$', hello),
+	url(r'^vtoy/text/$', rtthreadtext),
+    url(r'^vtoy/audio/$',rtthreadaudio),
+    url(r'^vtoy/$', handleWXHttpRequest), # for weixin handler
 )

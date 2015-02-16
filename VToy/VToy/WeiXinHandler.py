@@ -1,7 +1,6 @@
 import hashlib
 import time
 import xml.etree.ElementTree as ET
-from MilkQueryHandler import QueryHandler
 from django.template import Template, Context
 from settings import TEMPLATE_DIR
 
@@ -38,23 +37,35 @@ class WeiXinHandler:
             msg[child.tag] = child.text
         try:    
             if msg["MsgType"] == "event":
-                return """<xml>
-                        <ToUserName><![CDATA[{{ %s }}]]></ToUserName>
-                        <FromUserName><![CDATA[{{ %s }}]]></FromUserName>
-                        <CreateTime>{{ %s }}</CreateTime>
-                        <MsgType><![CDATA[{{ %s }}]]></MsgType>
-                        <Content><![CDATA[{{ %s }}]]></Content>
-                        <FuncFlag>0</FuncFlag>
-                        </xml>""" % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), 'text', 'Testing phase...')
+                c = Context({
+                    'ToUserName' : msg['FromUserName'],
+                    'FromUserName': msg['ToUserName'],
+                    'createTime': str(int(time.time())),
+                    'content' : 'testing vtoy',
+                    'msgType' : 'text'
+                    })
+        
+                    fp = open(TEMPLATE_DIR + '/text_templ')
+                    t = Template(fp.read())
+                    fp.close()
+        
+                    xmlReply = t.render(c)
+                    return xmlReply
             else:
-                return """<xml>
-                        <ToUserName><![CDATA[{{ %s }}]]></ToUserName>
-                        <FromUserName><![CDATA[{{ %s }}]]></FromUserName>
-                        <CreateTime>{{ %s }}</CreateTime>
-                        <MsgType><![CDATA[{{ %s }}]]></MsgType>
-                        <Content><![CDATA[{{ %s }}]]></Content>
-                        <FuncFlag>0</FuncFlag>
-                        </xml>""" % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), 'text', 'Testing phase...')
+                c = Context({
+                    'ToUserName' : msg['FromUserName'],
+                    'FromUserName': msg['ToUserName'],
+                    'createTime': str(int(time.time())),
+                    'content' : 'testing vtoy',
+                    'msgType' : 'text'
+                    })
+        
+                    fp = open(TEMPLATE_DIR + '/text_templ')
+                    t = Template(fp.read())
+                    fp.close()
+        
+                    xmlReply = t.render(c)
+                    return xmlReply
         except Exception, debuginfo:
             return WeiXinHandler.replydebugforwx(debuginfo, msg)
      
