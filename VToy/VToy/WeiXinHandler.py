@@ -3,8 +3,19 @@ import time
 import xml.etree.ElementTree as ET
 from django.template import Template, Context
 from settings import TEMPLATE_DIR
+import requests
 
 class WeiXinHandler:
+    #test account
+    # appid = "wxe10a58cb12e36d7d"
+    # appsecret = "8643cc7ba2214bfd2b1447601e0078e2"
+
+    #kidscare accout
+    appid = "wxdb5af81164a69efc"
+    appsecret = "2904773a8df1bbc22e995a42c4ae917f"
+    accesstoken = ""
+    accesstoken_timestamp = None
+    expire = 7200
     
     @staticmethod
     def checkSignature(request):
@@ -51,6 +62,10 @@ class WeiXinHandler:
         
                 xmlReply = t.render(c)
                 return xmlReply
+
+            elif msg["MsgType"] == "voice":
+                WeiXinHandler.receiveVoice(msg["MediaId "])
+                return
             else:
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
@@ -86,4 +101,33 @@ class WeiXinHandler:
         xmlReply = t.render(c)
         return xmlReply
         
- 
+    @staticmethod
+    def getaccesstoken():
+        cur_timestamp = int(time.time())
+        if WeiXinHandler.accesstoken_timestamp and (cur_timestamp - WeiXinHandler.accesstoken_timestamp) < WeiXinHandler.expire and WeiXinHandler.accesstoken:
+            return WeiXinHandler.accesstoken
+        url_params = {
+            "grant_type" : "client_credential",
+            "appid" : WeiXinHandler.appid,
+            "secret" : WeiXinHandler.appsecret,
+            }
+        r = requests.get("https://api.weixin.qq.com/cgi-bin/token", params=url_params)
+        #print(r.url)
+        response_json = r.json()
+        return response_json["access_token"]
+
+    @staticmethod
+    def receiveVoice(mediaId):
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            "media_id" : mediaId,
+            }        
+        r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params)
+        print r.status_code
+        print r.url
+        print r.content
+        if r.status_code == 200:
+            with open("voice.arm", "wb") as voice:
+                 voice.write(r.content)
+        else:
+            return "receive voice failed with error code %d" % r.status_code
