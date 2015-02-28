@@ -7,12 +7,12 @@ import requests
 
 class WeiXinHandler:
     #test account
-    # appid = "wxe10a58cb12e36d7d"
-    # appsecret = "8643cc7ba2214bfd2b1447601e0078e2"
+    appid = "wxe10a58cb12e36d7d"
+    appsecret = "8643cc7ba2214bfd2b1447601e0078e2"
 
     #kidscare accout
-    appid = "wxdb5af81164a69efc"
-    appsecret = "2904773a8df1bbc22e995a42c4ae917f"
+    #appid = "wxdb5af81164a69efc"
+    #appsecret = "2904773a8df1bbc22e995a42c4ae917f"
     accesstoken = ""
     accesstoken_timestamp = None
     expire = 7200
@@ -126,8 +126,9 @@ class WeiXinHandler:
         print r.status_code
         print r.url
         print r.content
-        if r.status_code == 200:
-            with open("voice.arm", "wb") as voice:
+        if r.headers["content-type"] == "audio/amr":
+            filename = "voice_%d.amr" % int(time.time())
+            with open(filename, "wb") as voice:
                  voice.write(r.content)
         else:
-            return "receive voice failed with error code %d" % r.status_code
+            return "receive voice failed with error msg : %s" % r.json()["errmsg"]
