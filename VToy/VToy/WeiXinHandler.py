@@ -5,6 +5,7 @@ from django.template import Template, Context
 from settings import TEMPLATE_DIR
 import requests
 import logging
+import json
 
 logger = logging.getLogger('consolelogger')
 
@@ -206,6 +207,7 @@ class WeiXinHandler:
         else:
             return ret['errmsg']
 
+    #For Old Weixin API
     @staticmethod
     def getDeviceQRCode(device_num, deviceid_list):
         """
@@ -215,7 +217,7 @@ class WeiXinHandler:
         Return: 1) device_num 
                 2) ticket_list
 
-        After user get the ticket_list, Tecent(Weixin) suggest us use qrencode library (QR version = 5，error correction level = Q ， mistake tolerate precent > 20%) to generate the point-mat image.
+        After user get the ticket_list, Tecent(Weixin) suggest us use qrencode library (QR version = 5, error correction level = Q, mistake tolerate precent > 20%) to generate the point-mat image.
         
         """
 
@@ -232,3 +234,123 @@ class WeiXinHandler:
             return ret['device_num'], ret['code_list']
         else:
             return 0,[]
+
+    #For Old Weixin API(only use to update DeviceAttributes for New Weixin API)
+    @staticmethod
+    def authorizeDevice(Devicelist, len):
+        import json
+        """
+        [Return json]
+        {"resp":[
+            {
+                 "base_info":
+                 {
+                    "device_type":"your_devcie_type",
+                    "device_id":"id"
+                 },
+                 "errcode":0,
+                 "errmsg":"ok"
+            }
+        ]}
+        """
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            }
+        Devicelist = dict()
+        Devicelist["device_num"] = '2'
+        from WeiXinUtils import WeiXinUtils
+
+        Devicelist["device_list"] = []
+        Devicelist["device_list"].append(WeiXinUtils.DeviceInfo())
+        Devicelist['op_type'] = '0'
+        r = requests.post("https://api.weixin.qq.com/device/authorize_device", params=url_params, data=json.dumps(Devicelist))
+        resp_json = r.json()
+        if resp_json.has_key("resp"):
+            authorized_devicelist = resp_json["resp"]
+            return [ (item['base_info']['device_id'],item['base_info']['device_type']) for item in authorized_devicelist]
+        else:
+            return []
+
+    #For new Weixin API
+    @staticmethod
+    def genDeviceIdAndQRTicket():
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            }
+        r = requests.post("https://api.weixin.qq.com/device/getqrcode", params=url_params)
+        resp_json = r.json()
+        if resp_json.has_key("deviceid") and resp_json.has_key("qrticket"):
+            return resp_json["deviceid"],resp_json["qrticket"]
+
+    @staticmethod
+    def bindDeivceWithUser(deviceId, openId, unbind=False):
+        """
+        deviceId: the Unique identity for device
+        openId: the Unique identity for Weixin user
+
+        return errcode, "0" - success; "-1" - failed 
+        """
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            }
+        data = {
+            "device_id": deviceId, 
+            "openid": openId
+        }
+        if unbind:
+            operator = 'compel_unbind'
+        else:
+            operator = 'compel_bind'
+        url = "https://api.weixin.qq.com/device/%s" % operator 
+        r = requests.post(url, params=url_params, data=json.dumps(data))
+
+        resp_json = r.json()
+        return resp_json['base_resp']['errcode']
+
+    @staticmethod
+    def queryDeviceStatus(deviceId):
+        """
+        return the status of device, for example "status":2 equal "status_info":"bind"
+        """
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            }
+        r = requests.post("https://api.weixin.qq.com/device/get_stat", params=url_params)
+        resp_json = r.json()
+        if resp_json.has_key("status") and resp_json.has_key("status_info"):
+            return resp_json['status'],resp_json['status_info']
+        else:
+            return None,None
+
+    @staticmethod
+    def queryOpenIDByDeviceInfo(deviceId, deviceType):
+        """
+        return openid of device's owner, maybe return a list
+        """
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            "device_type" : deviceType,
+            "device_id" : deviceId
+        }
+        r = requests.post("https://api.weixin.qq.com/device/get_openid", params=url_params)
+        resp_json = r.json()
+        if resp_json.has_key('open_id'):
+            return resp_json['open_id']
+
+    @staticmethod
+    def queryDeviceInfoByOpenID(openId):
+        """
+        return the device info list binded with openID
+        """
+
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            "openid" : openId
+        }
+
+        r = requests.post("https://api.weixin.qq.com/device/get_bind_device", params=url_params)
+        resp_json = r.json()
+        if resp_json.has_key('device_list'):
+            return resp_json['device_list']
+        else:
+            return []
