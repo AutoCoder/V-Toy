@@ -123,12 +123,10 @@ class WeiXinHandler:
             "media_id" : mediaId,
             }        
         r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params)
-        print r.status_code
-        print r.url
-        print r.content
+
         if r.headers["content-type"] == "audio/amr":
             filename = "voice_%d.amr" % int(time.time())
             with open(filename, "wb") as voice:
                  voice.write(r.content)
         else:
-            return "receive voice failed with error msg : %s" % r.json()["errmsg"]
+            print "receive voice failed with error msg : %s" % r.json()["errmsg"]
