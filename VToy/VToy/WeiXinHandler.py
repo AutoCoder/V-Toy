@@ -65,7 +65,20 @@ class WeiXinHandler:
 
             elif msg["MsgType"] == "voice":
                 WeiXinHandler.receiveVoice(msg["MediaId "])
-                return
+                c = Context({
+                    'ToUserName' : msg['FromUserName'],
+                    'FromUserName': msg['ToUserName'],
+                    'createTime': str(int(time.time())),
+                    'content' : 'testing receive voice',
+                    'msgType' : 'text'
+                    })
+        
+                fp = open(TEMPLATE_DIR + '/text_templ')
+                t = Template(fp.read())
+                fp.close()
+    
+                xmlReply = t.render(c)
+                return xmlReply
             else:
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
