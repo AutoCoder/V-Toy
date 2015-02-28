@@ -4,6 +4,9 @@ import xml.etree.ElementTree as ET
 from django.template import Template, Context
 from settings import TEMPLATE_DIR
 import requests
+import logging
+
+logger = logging.getLogger('consolelogger')
 
 class WeiXinHandler:
     #test account
@@ -64,7 +67,10 @@ class WeiXinHandler:
                 return xmlReply
 
             elif msg["MsgType"] == "voice":
-                WeiXinHandler.receiveVoice(msg["MediaId "])
+                logger.debug("In Voice")
+                logger.debug(str(msg))
+                WeiXinHandler.receiveVoice(msg["MediaId"])
+                logger.debug("After receiveVoice")
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
                     'FromUserName': msg['ToUserName'],
