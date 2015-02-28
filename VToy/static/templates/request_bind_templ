@@ -1,0 +1,12 @@
+<xml>
+    <ToUserName><![CDATA[ {{ToUserName}}]]></ToUserName>
+    <FromUserName><![CDATA[{{ FromUserName }}]]></FromUserName>
+    <CreateTime>{{ createTime }}</CreateTime>
+    <MsgType><![CDATA[{{ msgType }}]]></MsgType>
+    <Event><![CDATA[ {{ event }}]]></Event>
+    <DeviceType><![CDATA[ {{ deviceType }}]]></DeviceType>
+    <DeviceID><![CDATA[{{ deviceId }}]]></DeviceID>
+    <Content><![CDATA[{{ content }}]]></Content>
+    <SessionID>{{ sessionId }}</SessionID>
+    <OpenID><![CDATA[{{ openId }}]]></OpenID>
+</xml>

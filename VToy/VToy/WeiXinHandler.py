@@ -136,7 +136,7 @@ class WeiXinHandler:
         return response_json["access_token"]
 
     @staticmethod
-    def receiveVoice(mediaId):
+    def DownloadMedia(mediaId):
         url_params = {
             "access_token" : WeiXinHandler.getaccesstoken(),
             "media_id" : mediaId,
@@ -148,4 +148,87 @@ class WeiXinHandler:
             with open(filename, "wb") as voice:
                  voice.write(r.content)
         else:
-            print "receive voice failed with error msg : %s" % r.json()["errmsg"]
+            print "restore voice failed with error msg : %s" % r.json()["errmsg"]
+
+    @staticmethod
+    def UploadMedia(mediaType="voice", filename=""):
+        mediaId = ""
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            "type" : mediaType,
+            "media" : filename,
+            }      
+        r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params)
+        response_json = r.json()
+        if response_json.has_key("media_id"):
+            return mediaId
+        else:
+            print "upload media failed with error msg : %s" % r.json()["errmsg"]
+
+    @staticmethod
+    def handleVoiceMsg(msg):
+        mediaId = "12343546"
+        msgId = "12423425235"
+        format = 'mp3'
+        c = Context({
+            'ToUserName' : msg['FromUserName'],
+            'FromUserName': msg['ToUserName'],
+            'createTime': str(int(time.time())),
+            'mediaId' : mediaId,
+            'msgType' : 'voice',
+            'msgId' : msgId,
+            'format' : format,
+            })
+
+        fp = open(TEMPLATE_DIR + '/voice_templ')
+        t = Template(fp.read())
+        fp.close()
+
+        xmlReply = t.render(c)
+        return xmlReply
+
+    @staticmethod
+    def sendMsgToDevice(deviceId, deviceType, openId, content):
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            }
+        data_json = {
+                "device_type": deviceType,
+                "device_id": deviceId,
+                "open_id": openId,
+                "content": content
+            }
+
+        r = requests.post("https://api.weixin.qq.com/device/transmsg", params=url_params, data=json.dumps(data_json))
+        ret = r.json()
+        if ret.has_key('ret') and ret['ret'] == 0:
+            return ret['ret_info']
+        else:
+            return ret['errmsg']
+
+    @staticmethod
+    def getDeviceQRCode(device_num, deviceid_list):
+        """
+        Parameters: 1) The count of deviceIds
+                    2) The list of deviceIds
+
+        Return: 1) device_num 
+                2) ticket_list
+
+        After user get the ticket_list, Tecent(Weixin) suggest us use qrencode library (QR version = 5，error correction level = Q ， mistake tolerate precent > 20%) to generate the point-mat image.
+        
+        """
+
+        url_params = {
+            "access_token" : WeiXinHandler.getaccesstoken(),
+            }
+        data = {
+            "device_num": str(device_num),
+            "device_id_list": deviceid_list
+        }
+        r = requests.post("https://api.weixin.qq.com/device/create_qrcode", params=url_params, data=json.dumps(data))
+        ret = r.json()
+        if ret.has_key('code_list'):
+            return ret['device_num'], ret['code_list']
+        else:
+            return 0,[]
