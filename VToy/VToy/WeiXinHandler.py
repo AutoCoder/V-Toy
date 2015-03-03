@@ -6,6 +6,7 @@ from settings import TEMPLATE_DIR
 import requests
 import logging
 import json
+from chat.serializer import DBWrapper
 
 logger = logging.getLogger('consolelogger')
 
@@ -167,26 +168,31 @@ class WeiXinHandler:
             print "upload media failed with error msg : %s" % r.json()["errmsg"]
 
     @staticmethod
-    def handleVoiceMsg(msg):
-        mediaId = "12343546"
-        msgId = "12423425235"
-        format = 'mp3'
-        c = Context({
-            'ToUserName' : msg['FromUserName'],
-            'FromUserName': msg['ToUserName'],
-            'createTime': str(int(time.time())),
-            'mediaId' : mediaId,
-            'msgType' : 'voice',
-            'msgId' : msgId,
-            'format' : format,
-            })
+    def receiveToDeviceMsg(msg):
+        """restore this msg to db"""
 
-        fp = open(TEMPLATE_DIR + '/voice_templ')
-        t = Template(fp.read())
-        fp.close()
+        DBWrapper.restoreWxVoice(fromUser=msg['FromUserName'], sessionId=msg['SessionID'], createTime=msg['CreateTime'], \
+            content=msg['Content'], msgId=msg['MsgId'], openId=msg['MsgId'], deviceId=msg['DeviceID']) 
 
-        xmlReply = t.render(c)
-        return xmlReply
+    @staticmethod
+    def receivefromDeviceMsg(msg):
+        """restore this msg to db, then send this msg(voice) to weixin user
+           msg = {
+            'to_user':'xxx',
+            'create_time': 'xxx',
+            'device_id' : 'xxx',
+            'session_id' : 'xxx',
+            'content' : 'xxx',
+            'msg_type' : 'xxx',
+            'from_user' : 'xxx',
+            'device_type' : 'xxx'
+           }
+        """
+
+        DBWrapper.restoreDeviceVoice(toUser=msg['to_user'], createTime=msg['create_time'], deviceId=msg['device_id'], \
+            sessionId=msg['session_id'], content=msg['content'], msgType=msg['msg_type'], formUser=msg['from_user'], \
+            deviceType=msg['device_type']) 
+        #todo:send content back to weixin user
 
     @staticmethod
     def sendMsgToDevice(deviceId, deviceType, openId, content):
@@ -354,3 +360,5 @@ class WeiXinHandler:
             return resp_json['device_list']
         else:
             return []
+
+print WeiXinHandler.genDeviceIdAndQRTicket()
