@@ -3,7 +3,7 @@
 class WeiXinUtils:
 
     @staticmethod
-    def DeviceInfo(devId="001",mac="123456789ABC",connect_protocol="4|1|2|3", auth_key='',close_strategy='1',conn_strategy='1',crypt_method='0',auth_ver='1',manu_mac_pos='-1',ser_mac_pos='-2'):
+    def DeviceInfo(devId="001",mac="123456789ABC",connect_protocol="4|1|2|3", auth_key='',close_strategy='1',conn_strategy='1',crypt_method=0, auth_ver='1',manu_mac_pos='-1',ser_mac_pos='-2'):
         """  DeviceInfo list   
         {
             "device_num":"2",

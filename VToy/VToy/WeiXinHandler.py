@@ -6,7 +6,7 @@ from settings import TEMPLATE_DIR
 import requests
 import logging
 import json
-from chat.serializer import DBWrapper
+#import chat.serializer.DBWrapper
 
 logger = logging.getLogger('consolelogger')
 
@@ -172,7 +172,7 @@ class WeiXinHandler:
         """restore this msg to db"""
 
         DBWrapper.restoreWxVoice(fromUser=msg['FromUserName'], sessionId=msg['SessionID'], createTime=msg['CreateTime'], \
-            content=msg['Content'], msgId=msg['MsgId'], openId=msg['MsgId'], deviceId=msg['DeviceID']) 
+            content=msg['Content'], msgId=msg['MsgId'], openId=msg['OpenId'], deviceId=msg['DeviceID']) 
 
     @staticmethod
     def receivefromDeviceMsg(msg):
@@ -192,7 +192,26 @@ class WeiXinHandler:
         DBWrapper.restoreDeviceVoice(toUser=msg['to_user'], createTime=msg['create_time'], deviceId=msg['device_id'], \
             sessionId=msg['session_id'], content=msg['content'], msgType=msg['msg_type'], formUser=msg['from_user'], \
             deviceType=msg['device_type']) 
-        #todo:send content back to weixin user
+
+        #send content back to weixin user
+        fp = open(TEMPLATE_DIR + '/from_device_templ')
+        t = Template(fp.read())
+        fp.close()
+
+        c = Context({
+            'ToUserName' : msg['to_user'],
+            'FromUserName': 'vtoy', #weixin gong zhong zhang hao
+            'CreateTime': str(int(time.time())),
+            'MsgType' : 'device_voice',
+            'DeviceType' : 'vtoy', # gongzhong zhanghao yuanshi ID
+            'DeviceID' : msg['device_id'],
+            'SessionID' : msg['session_id'],
+            'Content' : msg['content'],
+            })
+
+        xmlReply = t.render(c)
+        return xmlReply
+
 
     @staticmethod
     def sendMsgToDevice(deviceId, deviceType, openId, content):
@@ -243,7 +262,7 @@ class WeiXinHandler:
 
     #For Old Weixin API(only use to update DeviceAttributes for New Weixin API)
     @staticmethod
-    def authorizeDevice(Devicelist, len):
+    def authorizeDevice(Devicelist):
         import json
         """
         [Return json]
@@ -262,20 +281,15 @@ class WeiXinHandler:
         url_params = {
             "access_token" : WeiXinHandler.getaccesstoken(),
             }
-        Devicelist = dict()
-        Devicelist["device_num"] = '2'
-        from WeiXinUtils import WeiXinUtils
-
-        Devicelist["device_list"] = []
-        Devicelist["device_list"].append(WeiXinUtils.DeviceInfo())
-        Devicelist['op_type'] = '0'
+        
         r = requests.post("https://api.weixin.qq.com/device/authorize_device", params=url_params, data=json.dumps(Devicelist))
         resp_json = r.json()
         if resp_json.has_key("resp"):
-            authorized_devicelist = resp_json["resp"]
-            return [ (item['base_info']['device_id'],item['base_info']['device_type']) for item in authorized_devicelist]
+            return resp_json
+            #authorized_devicelist = resp_json["resp"]
+            #return [ (item['base_info']['device_id'],item['base_info']['device_type']) for item in authorized_devicelist]
         else:
-            return []
+            return resp_json
 
     #For new Weixin API
     @staticmethod
@@ -320,13 +334,14 @@ class WeiXinHandler:
         """
         url_params = {
             "access_token" : WeiXinHandler.getaccesstoken(),
+            "device_id" : deviceId
             }
-        r = requests.post("https://api.weixin.qq.com/device/get_stat", params=url_params)
+        r = requests.get("https://api.weixin.qq.com/device/get_stat", params=url_params)
         resp_json = r.json()
         if resp_json.has_key("status") and resp_json.has_key("status_info"):
-            return resp_json['status'],resp_json['status_info']
+            resp_json['status'],resp_json['status_info']
         else:
-            return None,None
+            return resp_json
 
     @staticmethod
     def queryOpenIDByDeviceInfo(deviceId, deviceType):
@@ -361,4 +376,18 @@ class WeiXinHandler:
         else:
             return []
 
-print WeiXinHandler.genDeviceIdAndQRTicket()
+
+def test_authorizedevice():  
+    Devicelist = dict()
+    Devicelist["device_num"] = '1'
+    from WeiXinUtils import WeiXinUtils
+
+    Devicelist["device_list"] = []
+    Devicelist["device_list"].append(WeiXinUtils.DeviceInfo(devId='gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca',mac='1234567890AB'))
+    Devicelist['op_type'] = '1'
+    print Devicelist
+    print WeiXinHandler.authorizeDevice(Devicelist)
+
+
+test_authorizedevice()
+#print WeiXinHandler.queryDeviceStatus('gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca')
