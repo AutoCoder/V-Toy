@@ -2,3 +2,79 @@
 	"deviceid" : "gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca",
 	"qrticket" : "http://we.qq.com/d/AQDaXD_38okdc-uGcWAq-qq1IzN6rntI6oy6RRLa"
 }
+
+#revice text from weixin
+{
+	"FromUserName": "o2lw_t7-SnZTALxfBY-Q4JLskikc",
+ 	"MsgId": "6123031554935195801", 
+ 	"ToUserName": "gh_2fb6f6563f31", 
+ 	"Content": "hello", 
+	"MsgType": "text", "CreateTime": "1425629378"
+}
+
+#revice voice from weixin
+{
+	"MediaId": "w-MuwOM_3yFlPmY_Qjti2cm649hgXgkU1Rkxd0stxN-Jy8jOXp3p1CKLd80Ghbup", 
+	"Format": "amr",
+	"MsgId": "6123033229972441421", 
+	"ToUserName": "gh_2fb6f6563f31", 
+	"MsgType": "voice", 
+	"FromUserName": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"CreateTime": "1425629768", 
+	"Recognition": None
+}
+
+//un-attention to vtoy
+{
+	"OpenID": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"OpType": "0", 
+	"FromUserName": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"ToUserName": "gh_2fb6f6563f31", 
+	"CreateTime": "1425632749", 
+	"DeviceType": "gh_2fb6f6563f31", 
+	"DeviceID": "gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca", 
+	"MsgType": "device_event", 
+	"Event": "unsubscribe_status"
+}
+
+"POST /vtoy/?signature=26106270a3e4d04f46788ae361b1d3855a3bc3c5&timestamp=1425632749&nonce=477725580 HTTP/1.1" 200 0
+{
+	"OpenID": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"FromUserName": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"ToUserName": "gh_2fb6f6563f31", 
+	"CreateTime": "1425632749", 
+	"Content": None, 
+	"SessionID": "0", 
+	"DeviceType": "gh_2fb6f6563f31", 
+	"DeviceID": "gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca", 
+	"MsgType": "device_event", 
+	"Event": "unbind"
+}
+
+//attention to vtoy
+"POST /vtoy/?signature=3378d394f2795ea0aa07c4534a8a6536041bc638&timestamp=1425632749&nonce=422754914 HTTP/1.1" 200 0
+"POST /vtoy/?signature=38a3810c3c3414f8523ac12bc0447de5b78ffa3e&timestamp=1425632784&nonce=1092589787 HTTP/1.0" 200 274
+{
+	"OpenID": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"FromUserName": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"ToUserName": "gh_2fb6f6563f31", 
+	"CreateTime": "1425632784", 
+	"Content": None, 
+	"SessionID": "0", 
+	"DeviceType": "gh_2fb6f6563f31", 
+	"DeviceID": "gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca", 
+	"MsgType": "device_event", 
+	"Event": "bind"
+}
+"POST /vtoy/?signature=177fcdd67a9599aee2cbcbf6187614d41331aaa5&timestamp=1425632784&nonce=990400766 HTTP/1.1" 200 0
+{
+	"OpenID": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"OpType": "2", 
+	"FromUserName": "o2lw_t7-SnZTALxfBY-Q4JLskikc", 
+	"ToUserName": "gh_2fb6f6563f31", 
+	"CreateTime": "1425632785", 
+	"DeviceType": "gh_2fb6f6563f31", 
+	"DeviceID": "gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca", 
+	"MsgType": "device_event", 
+	"Event": "subscribe_status"
+}
