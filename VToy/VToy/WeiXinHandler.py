@@ -6,8 +6,15 @@ from settings import TEMPLATE_DIR
 import requests
 import logging
 import json
-#import chat.serializer.DBWrapper
 
+#the below code is for verifing the syntax 
+if __name__ == "__main__":
+    import os,sys
+    SYSPATH = os.path.dirname(os.path.dirname(__file__))
+    sys.path.append(SYSPATH)
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "VToy.settings")
+    
+from chat.serializer import DBWrapper
 logger = logging.getLogger('consolelogger')
 
 class WeiXinHandler:
@@ -68,20 +75,23 @@ class WeiXinHandler:
                 xmlReply = t.render(c)
                 return xmlReply
 
-            elif msg["MsgType"] == "voice":
-                logger.debug("In Voice")
+            elif msg["MsgType"] == "voice" or msg["MsgType"] == "text":
+                logger.debug("voice & text")
                 logger.debug(str(msg))
-                WeiXinHandler.receiveVoice(msg["MediaId"])
+                WeiXinHandler.receiveToDeviceMsg(msg)
                 logger.debug("After receiveVoice")
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
-                    'FromUserName': msg['ToUserName'],
-                    'createTime': str(int(time.time())),
-                    'content' : 'testing receive voice',
-                    'msgType' : 'text'
+                    'FromUserName': msg['ToUserName'], #weixin gong zhong zhang hao
+                    'CreateTime': str(int(time.time())),
+                    'MsgType' : msg['MsgType'],
+                    'DeviceType' : 'gh_2fb6f6563f31', # gongzhong zhanghao yuanshi ID
+                    'DeviceID' : msg['device_id'],
+                    'SessionID' : msg['session_id'],
+                    'Content' : msg['content'],
                     })
         
-                fp = open(TEMPLATE_DIR + '/text_templ')
+                fp = open(TEMPLATE_DIR + '/from_device_templ')
                 t = Template(fp.read())
                 fp.close()
     
@@ -339,7 +349,7 @@ class WeiXinHandler:
         r = requests.get("https://api.weixin.qq.com/device/get_stat", params=url_params)
         resp_json = r.json()
         if resp_json.has_key("status") and resp_json.has_key("status_info"):
-            resp_json['status'],resp_json['status_info']
+            return resp_json['status'],resp_json['status_info']
         else:
             return resp_json
 
@@ -385,9 +395,9 @@ def test_authorizedevice():
     Devicelist["device_list"] = []
     Devicelist["device_list"].append(WeiXinUtils.DeviceInfo(devId='gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca',mac='1234567890AB'))
     Devicelist['op_type'] = '1'
-    print Devicelist
+    print json.dumps(Devicelist)
     print WeiXinHandler.authorizeDevice(Devicelist)
 
-
-test_authorizedevice()
-#print WeiXinHandler.queryDeviceStatus('gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca')
+# Create your tests here.
+# test_authorizedevice()
+# print WeiXinHandler.queryDeviceStatus('gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca')
