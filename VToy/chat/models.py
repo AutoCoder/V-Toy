@@ -6,6 +6,17 @@ MessageType = (
  (2, 'Image'),
 )
 
+DeviceStatus = (
+    (0, 'Not alive'),
+    (1, 'alive'),
+)
+
+CloseStrategy = (
+    (1, 'disconnect when quit from vtoy'),
+    (2, 'still connect after quit from vtoy'),
+    (3, 'always attempt to connect'),
+)
+
 # Create your models here.
 class VToyUser(models.Model):
     id = models.AutoField(primary_key=True)
@@ -71,3 +82,18 @@ class ChatGroups(models.Model):
     sync_mark_of_device = models.DateTimeField()
     class Meta:
         db_table = 'chat_group'
+
+class DeviceInfo(models.Model):
+    id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
+    device_id = models.CharField(max_length=64)
+    status = models.CharField(max_length=1, choices=DeviceStatus)
+    mac = models.CharField(max_length=64)
+    connect_protocol = models.CharField(max_length=8)
+    auth_key = models.CharField(max_length=64)
+    close_strategy = models.CharField(max_length=1, choices=CloseStrategy)
+    crypt_method = models.CharField(max_length=1)
+    auth_ver = models.CharField(max_length=1)
+    manu_mac_pos = models.CharField(max_length=8)
+    ser_mac_pos = models.CharField(max_length=8)
+    class Meta:
+        db_table = 'device_info'
