@@ -25,8 +25,10 @@ class DBWrapper:
 	@staticmethod
 	def receiveWxVoice(fromuser,createtime,deviceid,devicetype,msgid, vdata):
 		try:
-			userobj = VToyUser(username=fromuser, weixin_id=fromuser)
-			userobj.save()
+			userobj = VToyUser.objects.filter(weixin_id=fromuser)
+			if not userobj:		
+				userobj = VToyUser(username=fromuser, weixin_id=fromuser)
+				userobj.save()
 			
 			chatobj = ChatWxToDevice(from_user=userobj, create_time=createtime, message_type='voice', device_id=deviceid, \
 				device_type=devicetype, msg_id=msgid)

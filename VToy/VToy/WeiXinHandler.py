@@ -96,8 +96,9 @@ class WeiXinHandler:
                         from datetime import datetime
                         time_now = datetime.fromtimestamp(int(msg["CreateTime"]))
                         logger.debug(str(time_now))
-                        DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
+                        info = DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
                             deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=vocice_data)
+                        logger.debug(info)
                     else:
                         raise ValueError("This open_id have not binded with any devices.")
 
