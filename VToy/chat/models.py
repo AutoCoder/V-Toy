@@ -35,9 +35,9 @@ class ChatWxToDevice(models.Model):
     device_id = models.CharField(max_length=64)
     device_type = models.CharField(max_length=32)
     msg_id = models.CharField(max_length=64)
-    voice_id = models.IntegerField()
-    text_id = models.IntegerField()
-    image_id = models.IntegerField()
+    voice_id = models.IntegerField(null=True)
+    text_id = models.IntegerField(null=True)
+    image_id = models.IntegerField(null=True)
     class Meta:
         db_table = 'chat_wx2device'
 
@@ -49,9 +49,9 @@ class ChatDeviceToWx(models.Model):
     message_type = models.CharField(max_length=1, choices=MessageType)
     device_id = models.CharField(max_length=64)
     device_type = models.CharField(max_length=32)
-    voice_id = models.IntegerField()
-    text_id = models.IntegerField()
-    image_id = models.IntegerField()    
+    voice_id = models.IntegerField(null=True)
+    text_id = models.IntegerField(null=True)
+    image_id = models.IntegerField(null=True)    
     class Meta:
         db_table = 'chat_device2wx'
 

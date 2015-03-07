@@ -84,16 +84,19 @@ class WeiXinHandler:
 
                     #1.download the media
                     logger.debug("1.download the media")
-                    vocice_data = WeiXinHandler.DownloadMedia('MediaId')
+                    vocice_data = WeiXinHandler.DownloadMedia(msg['MediaId'])
 
                     #2.query the device binded with
-                    logger.debug("1.query the device binded with")
+                    logger.debug("2.query the device binded with")
                     devicelist = WeiXinHandler.queryDeviceInfoByOpenID(open_id)
 
                     if devicelist:
                         device_id = devicelist[0]['device_id']
                         device_type = devicelist[0]['device_type']
-                        DBWrapper.receiveWxVoice(fromuser=open_id, createtime=msg["CreateTime"], \
+                        from datetime import datetime
+                        time_now = datetime.fromtimestamp(int(msg["CreateTime"])
+                        logger.debug(time_now)
+                        DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
                             deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=vocice_data)
                     else:
                         raise ValueError("This open_id have not binded with any devices.")
@@ -114,6 +117,7 @@ class WeiXinHandler:
                 fp.close()
     
                 xmlReply = t.render(c)
+                logger.debug(xmlReply)
                 return xmlReply
             elif msg["MsgType"] == "text":
                 c = Context({
@@ -426,5 +430,5 @@ def test_authorizedevice():
     print WeiXinHandler.authorizeDevice(Devicelist)
 
 # Create your tests here.
-# test_authorizedevice()
+test_authorizedevice()
 # print WeiXinHandler.queryDeviceStatus('gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca')
