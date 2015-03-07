@@ -30,7 +30,7 @@ class DBWrapper:
 				userobj = VToyUser(username=fromuser, weixin_id=fromuser)
 				userobj.save()
 			
-			chatobj = ChatWxToDevice(from_user=userobj, create_time=createtime, message_type='voice', device_id=deviceid, \
+			chatobj = ChatWxToDevice(from_user=userobj, create_time=createtime, message_type='0', device_id=deviceid, \
 				device_type=devicetype, msg_id=msgid)
 			
 			voice = ChatVoices(voice_data=vdata)

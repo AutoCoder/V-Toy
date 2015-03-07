@@ -76,18 +76,29 @@ class WeiXinHandler:
                 return xmlReply
 
             elif msg["MsgType"] == "voice":
-                logger.debug("begin voice path")
-                logger.debug(str(msg))
+                #logger.debug("begin voice path")
+                #logger.debug(str(msg))
 
                 if msg.has_key('MediaId') and msg.has_key('FromUserName') and msg.has_key('ToUserName'):
                     open_id = msg["FromUserName"]
 
                     #1.download the media
-                    logger.debug("1.download the media")
-                    vocice_data = WeiXinHandler.DownloadMedia(msg['MediaId'])
+                    #logger.debug("1.download the media")
+                    voice_data = None
+                    # try three times for download media
+                    for i in range(3):
+                        is_success, vocice_data = WeiXinHandler.DownloadMedia(msg['MediaId'])
+                        if is_success:
+                            logger.debug("try download for %d times." % (i+1))
+                            break
+                        else:
+                            continue
+                    if voice_data == None:
+                        raise ValueError("Download voice_data with mediaID - %s failed (retry 3 times)" % msg['MediaId'])
 
-                    #2.query the device binded with
-                    logger.debug("2.query the device binded with")
+
+                    #2.query the d:evice binded with
+                    #logger.debug("2.query the device binded with")
                     devicelist = WeiXinHandler.queryDeviceInfoByOpenID(open_id)
 
                     if devicelist:
@@ -95,17 +106,17 @@ class WeiXinHandler:
                         device_type = devicelist[0]['device_type']
                         from datetime import datetime
                         time_now = datetime.fromtimestamp(int(msg["CreateTime"]))
-                        logger.debug(str(time_now))
+                        #logger.debug(str(time_now))
                         info = DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
-                            deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=vocice_data)
-                        logger.debug(info)
+                            deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=voice_data)
+                        #logger.debug(info)
                     else:
                         raise ValueError("This open_id have not binded with any devices.")
 
                 else:
                     raise KeyError("Can't not found key %s or %s or %s" % ('MediaId', 'FromUserName', 'ToUserName'))
                 
-                logger.debug("After receiveVoice")
+                #logger.debug("After receiveVoice")
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
                     'FromUserName': msg['ToUserName'],
@@ -192,14 +203,15 @@ class WeiXinHandler:
             "media_id" : mediaId,
             }        
         r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params)
-
-        if r.headers["content-type"] == "audio/amr":
-            filename = "voice_%d.amr" % int(time.time())
-            with open(filename, "wb") as voice:
-                 voice.write(r.content)
-            return r.content
+        
+        if r.headers["content-type"] == "audio/amr" :
+            #filename = "voice_%d.amr" % int(time.time())
+            #with open(filename, "wb") as voice:
+            #     voice.write(r.content)
+            return True, r.content
         else:
-            print "restore voice failed with error msg : %s" % r.json()["errmsg"]
+            resp_json = r.json()
+            print False, ("restore voice failed with error msg : %s" % resp_json["errmsg"])
 
     @staticmethod
     def UploadMedia(mediaType="voice", filename=""):
