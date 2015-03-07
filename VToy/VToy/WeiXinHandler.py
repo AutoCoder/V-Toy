@@ -75,23 +75,56 @@ class WeiXinHandler:
                 xmlReply = t.render(c)
                 return xmlReply
 
-            elif msg["MsgType"] == "voice" or msg["MsgType"] == "text":
-                logger.debug("voice & text")
+            elif msg["MsgType"] == "voice":
+                logger.debug("begin voice path")
                 logger.debug(str(msg))
-                WeiXinHandler.receiveToDeviceMsg(msg)
+
+                if msg.has_key('MediaId') and msg.has_key('FromUserName') and msg.has_key('ToUserName'):
+                    open_id = msg["FromUserName"]
+
+                    #1.download the media
+                    logger.debug("1.download the media")
+                    vocice_data = WeiXinHandler.DownloadMedia('MediaId')
+
+                    #2.query the device binded with
+                    logger.debug("1.query the device binded with")
+                    devicelist = WeiXinHandler.queryDeviceInfoByOpenID(open_id)
+
+                    if devicelist:
+                        device_id = devicelist[0]['device_id']
+                        device_type = devicelist[0]['device_type']
+                        DBWrapper.receiveWxVoice(fromuser=open_id, createtime=msg["CreateTime"], \
+                            deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=vocice_data)
+                    else:
+                        raise ValueError("This open_id have not binded with any devices.")
+
+                else:
+                    raise KeyError("Can't not found key %s or %s or %s" % ('MediaId', 'FromUserName', 'ToUserName'))
+                
                 logger.debug("After receiveVoice")
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
-                    'FromUserName': msg['ToUserName'], #weixin gong zhong zhang hao
+                    'FromUserName': msg['ToUserName'],
                     'CreateTime': str(int(time.time())),
-                    'MsgType' : msg['MsgType'],
-                    'DeviceType' : 'gh_2fb6f6563f31', # gongzhong zhanghao yuanshi ID
-                    'DeviceID' : msg['device_id'],
-                    'SessionID' : msg['session_id'],
-                    'Content' : msg['content'],
+                    'Media_ID' : msg['MediaId'],
                     })
         
-                fp = open(TEMPLATE_DIR + '/from_device_templ')
+                fp = open(TEMPLATE_DIR + '/voice_reply_templ')
+                t = Template(fp.read())
+                fp.close()
+    
+                xmlReply = t.render(c)
+                return xmlReply
+            elif msg["MsgType"] == "text":
+                c = Context({
+                    'ToUserName' : msg['FromUserName'],
+                    'FromUserName': msg['ToUserName'],
+                    'createTime': str(int(time.time())),
+                    'content' : '[Test Reply] %s' % msg['Content'],
+                    'msgType' : 'text'
+                    })
+        
+                fp = open(TEMPLATE_DIR + '/text_templ')
                 t = Template(fp.read())
                 fp.close()
     
@@ -159,6 +192,7 @@ class WeiXinHandler:
             filename = "voice_%d.amr" % int(time.time())
             with open(filename, "wb") as voice:
                  voice.write(r.content)
+            return r.content
         else:
             print "restore voice failed with error msg : %s" % r.json()["errmsg"]
 
@@ -176,13 +210,6 @@ class WeiXinHandler:
             return mediaId
         else:
             print "upload media failed with error msg : %s" % r.json()["errmsg"]
-
-    @staticmethod
-    def receiveToDeviceMsg(msg):
-        """restore this msg to db"""
-
-        DBWrapper.restoreWxVoice(fromUser=msg['FromUserName'], sessionId=msg['SessionID'], createTime=msg['CreateTime'], \
-            content=msg['Content'], msgId=msg['MsgId'], openId=msg['OpenId'], deviceId=msg['DeviceID']) 
 
     @staticmethod
     def receivefromDeviceMsg(msg):

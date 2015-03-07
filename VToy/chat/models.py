@@ -27,16 +27,14 @@ class VToyUser(models.Model):
 
 class ChatWxToDevice(models.Model):
     id = models.AutoField(primary_key=True)
-    from_user = models.ForeignKey(VToyUser)
-    to_user = models.CharField(max_length=64)
+    from_user = models.ForeignKey(VToyUser)#open_id
     receive_time = models.DateTimeField(auto_now_add=True)
     create_time = models.DateTimeField()
-    session_id = models.CharField(max_length=64)
+    session_id = models.CharField(max_length=64, default='')
     message_type = models.CharField(max_length=1, choices=MessageType)
     device_id = models.CharField(max_length=64)
     device_type = models.CharField(max_length=32)
     msg_id = models.CharField(max_length=64)
-    open_id = models.CharField(max_length=64)
     voice_id = models.IntegerField()
     text_id = models.IntegerField()
     image_id = models.IntegerField()
@@ -88,12 +86,12 @@ class DeviceInfo(models.Model):
     device_id = models.CharField(max_length=64)
     status = models.CharField(max_length=1, choices=DeviceStatus)
     mac = models.CharField(max_length=64)
-    connect_protocol = models.CharField(max_length=8)
+    connect_protocol = models.CharField(max_length=8, default='4')
     auth_key = models.CharField(max_length=64)
-    close_strategy = models.CharField(max_length=1, choices=CloseStrategy)
-    crypt_method = models.CharField(max_length=1)
-    auth_ver = models.CharField(max_length=1)
-    manu_mac_pos = models.CharField(max_length=8)
-    ser_mac_pos = models.CharField(max_length=8)
+    close_strategy = models.CharField(max_length=1, choices=CloseStrategy, default='1')
+    crypt_method = models.CharField(max_length=1, default='1')
+    auth_ver = models.CharField(max_length=1, default='1')
+    manu_mac_pos = models.CharField(max_length=8,default='-1')
+    ser_mac_pos = models.CharField(max_length=8,default='-2')
     class Meta:
         db_table = 'device_info'
