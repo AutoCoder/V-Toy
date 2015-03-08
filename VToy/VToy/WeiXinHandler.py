@@ -53,7 +53,7 @@ class WeiXinHandler:
             elif msg["MsgType"] == "voice":
                 return WeiXinHandler.handleVoiceMsg(msg)
             elif msg["MsgType"] == "text":
-                text = '[Test Reply] %s' % msg['Content'],
+                text = u'[Test Reply] %s' % msg['Content'] # use unicode for chinese input/output
                 return WeiXinHandler.replyTextForMsg(msg, text)
             elif msg["MsgType"] == "device_event":
                 if msg["Event"] == 'bind':
@@ -92,7 +92,7 @@ class WeiXinHandler:
                 raise ValueError("Download voice_data with mediaID - %s failed (retry 3 times)" % msg['MediaId'])
 
 
-            #2.query the d:evice binded with
+            #2.query the device binded with
             logger.debug("2.query the device binded with")
             devicelist = WeiXinUtils.queryDeviceInfoByOpenID(open_id)
 
@@ -102,6 +102,8 @@ class WeiXinHandler:
                 from datetime import datetime
                 time_now = datetime.fromtimestamp(int(msg["CreateTime"]))
                 logger.debug(str(time_now))
+
+                # receiveWxVoice will also update the DeviceStatus [attr : latest_msg_receive_time]
                 info = DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
                     deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=voice_data)
                 logger.debug(info)
@@ -148,10 +150,6 @@ class WeiXinHandler:
     def handleBindMsg(msg):
         logger.debug("handleBindMsg success")
             
-
-
-
-
 def test_authorizedevice():  
     Devicelist = dict()
     Devicelist["device_num"] = '1'

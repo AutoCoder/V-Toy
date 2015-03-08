@@ -73,18 +73,17 @@ class ChatImages(models.Model):
     class Meta:
         db_table = 'chat_image'
 
-class ChatGroups(models.Model):
+class DeviceStatus(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
-    hardware_mac = models.CharField(max_length=30)
-    clients = models.TextField() #json
-    sync_mark_of_device = models.DateTimeField()
+    device_id = models.CharField(max_length=64, unique=True)
+    lastest_syncfromdevice_time = models.DateTimeField(auto_now_add=True)
+    latest_msg_receive_time = models.DateTimeField(auto_now_add=True)
     class Meta:
-        db_table = 'chat_group'
+        db_table = 'device_status'
 
 class DeviceInfo(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
     device_id = models.CharField(max_length=64)
-    status = models.CharField(max_length=1, choices=DeviceStatus)
     mac = models.CharField(max_length=64)
     connect_protocol = models.CharField(max_length=8, default='4')
     auth_key = models.CharField(max_length=64)

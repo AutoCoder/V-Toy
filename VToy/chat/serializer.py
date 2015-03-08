@@ -1,4 +1,4 @@
-from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, MessageType
+from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus
 import base64
 
 class DBWrapper:
@@ -23,10 +23,17 @@ class DBWrapper:
 	# 	chatobj.save()
 
 	@staticmethod
-	def receiveWxVoice(fromuser,createtime,deviceid,devicetype,msgid, vdata):
+	def receiveWxVoice(fromuser,createtime,deviceid,devicetype,msgid, vdata):\
+	"""
+	1) restore the voice data into ChatWxToDevice, ChatVoices
+	2) if user doesn't exist, add user into VToyUser
+	3) if DeviceStatus doesn't exist, create DeviceStatus instance into DeviceStatus table. 
+       if exist, update the latest_msg_receive_time of DeviceStatu.
+	"""
 		try:
-			userobj = VToyUser.objects.get(weixin_id=fromuser)
-			if not userobj:		
+			try:
+				userobj = VToyUser.objects.get(weixin_id=fromuser)
+			except VToyUser.DoesNotExist:
 				userobj = VToyUser(username=fromuser, weixin_id=fromuser)
 				userobj.save()
 			
@@ -39,11 +46,17 @@ class DBWrapper:
 			chatobj.voice_id = voice.id
 			chatobj.save()
 
+			#update device status
+			try:
+				devicestatus = DeviceStatus.objects.get(device_id=deviceid)
+			except DeviceStatus.DoesNotExist:
+				userobj = DeviceStatus(device_id=deviceid, latest_msg_receive_time=createtime)
+				userobj.save()				
+
 			return True
 		except Exception,info:
 			return info
-
-
+	
 	# @staticmethod
 	# def restoreDeviceVoice(toUser, createTime, deviceId, sessionId, content, msgType='device_voice', formUser='wxgzzh', deviceType=''):
 	# 	"""Note: the content parameter should be binrary. this function will store to db directly."""
