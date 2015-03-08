@@ -83,11 +83,11 @@ class WeiXinHandler:
                     open_id = msg["FromUserName"]
 
                     #1.download the media
-                    #logger.debug("1.download the media")
+                    logger.debug("1.download the media")
                     voice_data = None
                     # try three times for download media
                     for i in range(3):
-                        is_success, vocice_data = WeiXinHandler.DownloadMedia(msg['MediaId'])
+                        is_success, voice_data = WeiXinHandler.DownloadMedia(msg['MediaId'])
                         if is_success:
                             logger.debug("try download for %d times." % (i+1))
                             break
@@ -98,7 +98,7 @@ class WeiXinHandler:
 
 
                     #2.query the d:evice binded with
-                    #logger.debug("2.query the device binded with")
+                    logger.debug("2.query the device binded with")
                     devicelist = WeiXinHandler.queryDeviceInfoByOpenID(open_id)
 
                     if devicelist:
@@ -106,17 +106,17 @@ class WeiXinHandler:
                         device_type = devicelist[0]['device_type']
                         from datetime import datetime
                         time_now = datetime.fromtimestamp(int(msg["CreateTime"]))
-                        #logger.debug(str(time_now))
+                        logger.debug(str(time_now))
                         info = DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
                             deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=voice_data)
-                        #logger.debug(info)
+                        logger.debug(info)
                     else:
                         raise ValueError("This open_id have not binded with any devices.")
 
                 else:
                     raise KeyError("Can't not found key %s or %s or %s" % ('MediaId', 'FromUserName', 'ToUserName'))
                 
-                #logger.debug("After receiveVoice")
+                logger.debug("After receiveVoice")
                 c = Context({
                     'ToUserName' : msg['FromUserName'],
                     'FromUserName': msg['ToUserName'],
