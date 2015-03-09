@@ -1,8 +1,11 @@
 from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo
-import base64
+import logging
+
+logger = logging.getLogger('consolelogger')
 
 class DBWrapper:
-
+	from datetime import datetime
+	utc_begin_datetime = datetime.utcfromtimestamp(0)
 	# @staticmethod
 	# def restoreWxVoice(fromUser, sessionId, createTime, content, msgId, openId, deviceId, toUser='wxgzzh', msgType='device_voice', deviceType=''):
 	# 	"""Note: the cotent parameter is encoded by base64, this function will decode and then store to db."""
@@ -47,13 +50,18 @@ class DBWrapper:
 
 			#update device status
 			try:
+				logger.debug("begin to update devicestatus")
 				devicestatus = DeviceStatus.objects.get(device_id=deviceid)
 				devicestatus.latest_msg_receive_time = createtime
 				userobj.save()
+				logger.debug("end update devicestatus")
 
 			except DeviceStatus.DoesNotExist:
-				userobj = DeviceStatus(device_id=deviceid, latest_msg_receive_time=createtime)
+				logger.debug("begin to create devicestatus")
+				userobj = DeviceStatus(device_id=deviceid, latest_msg_receive_time=createtime, \
+					lastest_syncfromdevice_time=DBWrapper.utc_begin_datetime)
 				userobj.save()
+				logger.debug("end to create devicestatus")
 
 			return True,None
 		except Exception,info:
@@ -70,7 +78,7 @@ class DBWrapper:
 			deviceInfo.save()
 
 			return True,None
-		except Exception,info:
+		except Exception,info: 
 			return False,info
 	# @staticmethod
 	# def restoreDeviceVoice(toUser, createTime, deviceId, sessionId, content, msgType='device_voice', formUser='wxgzzh', deviceType=''):
