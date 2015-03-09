@@ -23,13 +23,12 @@ class DBWrapper:
 	# 	chatobj.save()
 
 	@staticmethod
-	def receiveWxVoice(fromuser,createtime,deviceid,devicetype,msgid, vdata):\
-	"""
-	1) restore the voice data into ChatWxToDevice, ChatVoices
-	2) if user doesn't exist, add user into VToyUser
-	3) if DeviceStatus doesn't exist, create DeviceStatus instance into DeviceStatus table. 
-       if exist, update the latest_msg_receive_time of DeviceStatu.
-	"""
+	def receiveWxVoice(fromuser,createtime,deviceid,devicetype,msgid, vdata):
+		"""
+		1) restore the voice data into ChatWxToDevice, ChatVoices 
+		2) if user doesn't exist, add user into VToyUser 
+		3) if DeviceStatus doesn't exist, create DeviceStatus instance into DeviceStatus table. if exist, update the latest_msg_receive_time of DeviceStatu.
+		"""
 		try:
 			try:
 				userobj = VToyUser.objects.get(weixin_id=fromuser)
@@ -49,9 +48,12 @@ class DBWrapper:
 			#update device status
 			try:
 				devicestatus = DeviceStatus.objects.get(device_id=deviceid)
+				devicestatus.latest_msg_receive_time = createtime
+				userobj.save()
+
 			except DeviceStatus.DoesNotExist:
 				userobj = DeviceStatus(device_id=deviceid, latest_msg_receive_time=createtime)
-				userobj.save()				
+				userobj.save()
 
 			return True,None
 		except Exception,info:
@@ -66,7 +68,7 @@ class DBWrapper:
 			deviceInfo = DeviceInfo(device_id=deviceId, mac=macAddress, connect_protocol=connectProtocol, auth_key=authKey, conn_strategy=connStrategy, \
 			 close_strategy=closeStrategy, crypt_method=cryptMethod, auth_ver=authVer, manu_mac_pos=manuMacPos, ser_mac_pos=serMacPos)
 			deviceInfo.save()
-			
+
 			return True,None
 		except Exception,info:
 			return False,info
