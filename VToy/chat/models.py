@@ -83,10 +83,11 @@ class DeviceStatus(models.Model):
 
 class DeviceInfo(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
-    device_id = models.CharField(max_length=64)
-    mac = models.CharField(max_length=64)
+    device_id = models.CharField(max_length=64, unique=True)
+    mac = models.CharField(max_length=64, unique=True)
     connect_protocol = models.CharField(max_length=8, default='4')
     auth_key = models.CharField(max_length=64)
+    conn_strategy = models.CharField(max_length=1, default='1')
     close_strategy = models.CharField(max_length=1, choices=CloseStrategy, default='1')
     crypt_method = models.CharField(max_length=1, default='1')
     auth_ver = models.CharField(max_length=1, default='1')

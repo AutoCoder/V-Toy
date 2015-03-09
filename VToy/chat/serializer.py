@@ -1,4 +1,4 @@
-from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus
+from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo
 import base64
 
 class DBWrapper:
@@ -53,10 +53,23 @@ class DBWrapper:
 				userobj = DeviceStatus(device_id=deviceid, latest_msg_receive_time=createtime)
 				userobj.save()				
 
-			return True
+			return True,None
 		except Exception,info:
-			return info
+			return False,info
 	
+	@staticmethod
+	def registerDevice(deviceId, macAddress, connectProtocol='4',authKey='', connStrategy='1', closeStrategy='1', cryptMethod='0', authVer='0', manuMacPos='-1', serMacPos='-2'):
+		"""
+		store the device info
+		"""
+		try:
+			deviceInfo = DeviceInfo(device_id=deviceId, mac=macAddress, connect_protocol=connectProtocol, auth_key=authKey, conn_strategy=connStrategy, \
+			 close_strategy=closeStrategy, crypt_method=cryptMethod, auth_ver=authVer, manu_mac_pos=manuMacPos, ser_mac_pos=serMacPos)
+			deviceInfo.save()
+			
+			return True,None
+		except Exception,info:
+			return False,info
 	# @staticmethod
 	# def restoreDeviceVoice(toUser, createTime, deviceId, sessionId, content, msgType='device_voice', formUser='wxgzzh', deviceType=''):
 	# 	"""Note: the content parameter should be binrary. this function will store to db directly."""

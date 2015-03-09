@@ -168,11 +168,11 @@ class WeiXinUtils:
         r = requests.post("https://api.weixin.qq.com/device/authorize_device", params=url_params, data=json.dumps(Devicelist))
         resp_json = r.json()
         if resp_json.has_key("resp"):
-            return resp_json
+            return True,resp_json
             #authorized_devicelist = resp_json["resp"]
             #return [ (item['base_info']['device_id'],item['base_info']['device_type']) for item in authorized_devicelist]
         else:
-            return resp_json
+            return False,resp_json
 
     #For new Weixin API
     @staticmethod

@@ -91,7 +91,6 @@ class WeiXinHandler:
             if voice_data == None:
                 raise ValueError("Download voice_data with mediaID - %s failed (retry 3 times)" % msg['MediaId'])
 
-
             #2.query the device binded with
             logger.debug("2.query the device binded with")
             devicelist = WeiXinUtils.queryDeviceInfoByOpenID(open_id)
@@ -104,9 +103,12 @@ class WeiXinHandler:
                 logger.debug(str(time_now))
 
                 # receiveWxVoice will also update the DeviceStatus [attr : latest_msg_receive_time]
-                info = DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
+                issuccess, info = DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
                     deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=voice_data)
-                logger.debug(info)
+                if issuccess:
+                    logger.debug("DBWrapper.receiveWxVoice success!")
+                else:
+                    logger.debug("DBWrapper.receiveWxVoice failed, Reason[%s]." % info)
             else:
                 raise ValueError("This open_id have not binded with any devices.")
 
@@ -148,6 +150,7 @@ class WeiXinHandler:
 
     @staticmethod
     def handleBindMsg(msg):
+
         logger.debug("handleBindMsg success")
             
 def test_authorizedevice():  
