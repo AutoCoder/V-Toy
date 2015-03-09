@@ -53,7 +53,7 @@ class DBWrapper:
 				logger.debug("begin to update devicestatus")
 				devicestatus = DeviceStatus.objects.get(device_id=deviceid)
 				devicestatus.latest_msg_receive_time = createtime
-				userobj.save()
+				devicestatus.save()
 				logger.debug("end update devicestatus")
 
 			except DeviceStatus.DoesNotExist:
