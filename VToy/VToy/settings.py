@@ -100,7 +100,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'static/templates')
 # Static files (CSS, JavaScript, Images)
