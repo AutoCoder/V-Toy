@@ -13,10 +13,10 @@ from VToy.WeiXinUtils import WeiXinUtils
 import os
 
 def GenQRImage(MacAddress):
-	#1） apply deviceId and qrticket
+	#1) apply deviceId and qrticket
 	deviceId,qrTicket = WeiXinUtils.genDeviceIdAndQRTicket()
 
-	#2） Authrize the applyed deviceId, in this step it need pass macaddress
+	#2) Authrize the applyed deviceId, in this step it need pass macaddress
     Devicelist = dict()
     Devicelist["device_num"] = '1'
 
