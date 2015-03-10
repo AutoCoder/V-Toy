@@ -8,16 +8,18 @@ Output file: DFASF-FSGA-GSDFGS-GSDGSD.png
 Usage: GenQRImage.py "DFASF-FSGA-GSDFGS-GSDGSD"
 
 """
+import os,sys
+SYSPATH = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(SYSPATH)
 
 from VToy.WeiXinUtils import WeiXinUtils
-import os
+
 
 def GenQRImage(MacAddress):
-	#1) apply deviceId and qrticket
-	deviceId,qrTicket = WeiXinUtils.genDeviceIdAndQRTicket()
-
-	#2) Authrize the applyed deviceId, in this step it need pass macaddress
-    Devicelist = dict()
+    #1) apply deviceId and qrticket
+    deviceId, qrTicket = WeiXinUtils.genDeviceIdAndQRTicket()
+    #2) Authrize the applyed deviceId, in this step it need pass macaddress
+    Devicelist = {}
     Devicelist["device_num"] = '1'
 
     Devicelist["device_list"] = []
@@ -26,14 +28,14 @@ def GenQRImage(MacAddress):
 
     issuccess, resp =  WeiXinUtils.authorizeDevice(Devicelist)
     if issuccess:
-    	#3) call qrencode to generate QRImage with png format, and then save MacAddress.png
-		cmd = 'qrencode -o %s.png -v 5 -l Q "%s"' % (MacAddress,MacAddress)
-		return os.system(cmd)
+        #3) call qrencode to generate QRImage with png format, and then save MacAddress.png
+        cmd = 'qrencode -o %s.png -v 5 -l Q "%s"' % (MacAddress,MacAddress)
+        return os.system(cmd)
     else:
-    	print "Authrize to Wx server failed, please try again."
-    	return 1
+        print "Authrize to Wx server failed, please try again."
+        return 1
 
 if __name__ == "__main__":
-	GenQRImage(sys.argv[1])
+    GenQRImage(sys.argv[1])
 
 
