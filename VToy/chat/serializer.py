@@ -1,5 +1,5 @@
 from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo
-from Public.Utils import utcdatatime2utctimestamp
+from Public.Utils import utcdatatime2utctimestamp, utctimestamp2utcdatatime
 import logging
 
 logger = logging.getLogger('consolelogger')
@@ -69,9 +69,9 @@ class DBWrapper:
 					debuginfo = "DeviceStatus table doesn't contain this deviceId" + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
 					logger.debug(debuginfo)
 					return False, debuginfo
-				userobj = DeviceStatus(device_id=deviceid, mac=macAddress, latest_msg_receive_time=createtime, \
+				devicestat = DeviceStatus(device_id=deviceid, mac=macAddress, latest_msg_receive_time=createtime, \
 					lastest_syncfromdevice_time=DBWrapper.utc_begin_datetime)
-				userobj.save()
+				devicestat.save()
 				logger.debug("end to create devicestatus")
 
 			return True,None
@@ -123,7 +123,7 @@ class DBWrapper:
 			if sync_mark < latest_msg_receive_timestamp:
 				#sync_mark is before latest_msg_receive_time, so that need to query recent received msgs
 				logger.debug('sync_mark is before latest_msg_receive_time, so that need to query recent received msgs')
-				sync_datetime = datetime.utcfromtimestamp(sync_mark)
+				sync_datetime = utctimestamp2utcdatatime(sync_mark)
 				querset = ChatWxToDevice.objects.filter(create_time>sync_datetime, message_type='0').order_by("create_time")#message_type = Voice
 				ret_dict = {}
 				if queryset:
