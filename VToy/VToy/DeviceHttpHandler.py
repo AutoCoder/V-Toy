@@ -25,7 +25,7 @@ class DeviceHttpHandler:
             if post_json.has_key("mac") and post_json.has_key("sync_mark"):
                 noexception, response = DBWrapper.getUnSyncedMsgs(post_json["mac"], post_json["sync_mark"])
                 devicelogger.debug(response)
-		if noexception:
+                if noexception:
                     return HttpResponse(json.dumps(response))
                 else:
                     return HttpResponse(content=json.dumps(response), status=400)
@@ -38,6 +38,8 @@ class DeviceHttpHandler:
     @staticmethod
     def handleGetVoice(request, voiceId):
         devicelogger.debug("on getVoice")
+        #may need convert amr to wav before sending to device
+        
         return HttpResponse("implementing...")
 
     @staticmethod

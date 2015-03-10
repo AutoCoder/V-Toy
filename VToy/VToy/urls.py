@@ -7,10 +7,10 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^vtoy/admin/', include(admin.site.urls)),
     url(r'^vtoy/hello/$', hello),
-	url(r'^vtoy/text/$', rtthreadtext),
+    url(r'^vtoy/text/$', rtthreadtext),
     url(r'^vtoy/audio/$',rtthreadaudio),
-    url(r'^vtoy/$', handleWXHttpRequest), # for weixin handler
     url(r'^vtoy/messages/$', DeviceHttpHandler.handleQueryNewMsg),
     url(r'^vtoy/voice/(\d+)/$', DeviceHttpHandler.handleGetVoice),
     url(r'^vtoy/message/$', DeviceHttpHandler.handleSendMsg),
+    url(r'^vtoy/$', handleWXHttpRequest), # for weixin handler
 )
