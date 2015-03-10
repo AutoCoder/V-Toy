@@ -15,7 +15,7 @@ class DeviceHttpHandler:
         if request.method != "POST":
             ret = {}
             ret["errcode"] = 1
-            ret["errmsg"] = "please use httpmethod - 'POST'."
+            ret["errmsg"] = "please use httpmethod - 'POST'"
             return HttpResponse(json.dumps(ret))
         else:
             devicelogger.debug(request.body)
@@ -56,39 +56,56 @@ class DeviceHttpHandler:
         """
         This request should post [macaddress], then apply deviceId & qrticket from Wx. finally restore all the device info into db
         """
-        devicelogger.debug("on handleAuthorizeDeviceRequest")
+        devicelogger.debug("on handleRegisterDevice")
+        if request.method != "POST":
+            ret = {}
+            ret["errcode"] = 1
+            ret["errmsg"] = "please use httpmethod - 'POST'"
+            return HttpResponse(json.dumps(ret))
 
-        deviceId = 'gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca'
-        qrticket = "xxx"
-        macaddress = '1234567890AB'
+        if not request.POST.has_key("mac"):
+            ret = {}
+            ret["errcode"] = 2
+            ret["errmsg"] = "please use pass mac address by POST"
+            return HttpResponse(json.dumps(ret))
+
+        deviceId, qrTicket = WeiXinUtils.genDeviceIdAndQRTicket()
+        macaddress = request.POST["mac"]
+
         Devicelist = dict()
         Devicelist["device_num"] = '1'
 
         Devicelist["device_list"] = []
         deviceinfo = WeiXinUtils.DeviceInfo(devId=deviceId,mac=macaddress)
         Devicelist["device_list"].append(deviceinfo)
-        Devicelist['op_type'] = '1'
-        print json.dumps(Devicelist)
+        Devicelist['op_type'] = '0'
+        devicelogger.debug(Devicelist)
+
         issuccess, authorizeInfo = WeiXinUtils.authorizeDevice(Devicelist)
-        db_related_info = ""
+        db_related_info=""
         if issuccess:
             # if authorizeDevice success, then store the DeviceInfo to db
             issuccess, db_related_info = DBWrapper.registerDevice(deviceId=DeviceInfo['id'], macAddress=DeviceInfo['mac'])
 
         if issuccess:
-            # return the deviceId to device side
-            ret = dict()
-            relationship = dict()
-            relationship["device_id"] = deviceId
-            relationship["qrticket"] = qrticket
-            relationship["mac"] = macaddress
-            ret["errorcode"] = 0
-            ret["info"] = relationship
+            from Public.Utils import GenQRImage
+            ret, filepath = GenQRImage(macaddress, qrTicket)
+            if ret == 0:
+                #success
+                f = open(filepath, 'rb')
+                data = f.read()
+                response = HttpResponse(data, content_type='image/png')
+                response['Content-Disposition'] = 'attachment; filename=%s.wav' % macaddress 
+                f.close()
+                return response
+            else
+                resp = {}
+                resp["errcode"] = 6
+                resp["errmsg"] = "[authorize] %s; [db] %s; [qrencode] errcode:%d" % (authorizeInfo, db_related_info, ret)
+                return HttpResponse(content=json.dumps(resp), status=500)
             
         else:
             ret = dict()
             ret["errcode"] = 123;
             ret["errmsg"] = "[authorizeDevice]: %s; [db_related]: %s" % (authorizeInfo, db_related_info)
-
-        #Todo: return the device id, qrticket and macaddress.
-        return HttpResponse(json.dumps(ret))
+            return HttpResponse(json.dumps(ret))

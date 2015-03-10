@@ -12,5 +12,6 @@ urlpatterns = patterns('',
     url(r'^vtoy/messages/$', DeviceHttpHandler.handleQueryNewMsg),
     url(r'^vtoy/voice/(\d+)/$', DeviceHttpHandler.handleGetVoice),
     url(r'^vtoy/message/$', DeviceHttpHandler.handleSendMsg),
+    url(r'^vtoy/qrimage/$', DeviceHttpHandler.handleRegisterDevice),
     url(r'^vtoy/$', handleWXHttpRequest), # for weixin handler
 )
