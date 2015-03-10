@@ -171,7 +171,7 @@ class DBWrapper:
 	@staticmethod
 	def getVoice(voiceId):
 		try:
-			vdata = DeviceInfo.objects.get(id=voiceId).voice_data
+			vdata = ChatVoices.objects.get(id=voiceId).voice_data
 			return True, vdata
 		except ChatVoices.DoesNotExist:
 			ret_dict = {}
