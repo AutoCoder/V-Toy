@@ -1,5 +1,5 @@
 from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo
-from Public.Utils import utcdatatime2utctimestamp, utctimestamp2utcdatatime
+from Public.Utils import utcdatetime2utctimestamp, utctimestamp2utcdatetime
 import logging
 
 logger = logging.getLogger('consolelogger')
@@ -66,7 +66,7 @@ class DBWrapper:
 				try:
 					macAddress = DeviceInfo.objects.get(device_id=deviceid).mac
 				except DeviceInfo.DoesNotExist:
-					debuginfo = "DeviceStatus table doesn't contain this deviceId" + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
+					debuginfo = "DeviceStatus table doesn't contain this deviceId; " + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
 					logger.debug(debuginfo)
 					return False, debuginfo
 				devicestat = DeviceStatus(device_id=deviceid, mac=macAddress, latest_msg_receive_time=createtime, \
@@ -117,29 +117,35 @@ class DBWrapper:
 
 		try:
 			status = DeviceStatus.objects.get(mac=macaddress)
-			latest_msg_receive_timestamp = utcdatatime2utctimestamp(status.latest_msg_receive_time)
-			lastest_syncfromdevice_timestamp = utcdatatime2utctimestamp(status.lastest_syncfromdevice_time)
+			latest_msg_receive_timestamp = utcdatetime2utctimestamp(status.latest_msg_receive_time)
+			lastest_syncfromdevice_timestamp = utcdatetime2utctimestamp(status.lastest_syncfromdevice_time)
 
+			logger.debug("sync_mark is %d" % sync_mark)
 			if sync_mark < latest_msg_receive_timestamp:
 				#sync_mark is before latest_msg_receive_time, so that need to query recent received msgs
 				logger.debug('sync_mark is before latest_msg_receive_time, so that need to query recent received msgs')
-				sync_datetime = utctimestamp2utcdatatime(sync_mark)
-				querset = ChatWxToDevice.objects.filter(create_time>sync_datetime, message_type='0').order_by("create_time")#message_type = Voice
+				sync_datetime = utctimestamp2utcdatetime(sync_mark)
+				queryset = ChatWxToDevice.objects.filter(create_time__gt=sync_datetime, message_type='0').order_by("create_time")#message_type = Voice
+				logger.debug("query count is %d" % queryset.count())
 				ret_dict = {}
+				ret_dict["senders_weixin"]=[]
+				ret_dict["senders_userId"]=[]
+				ret_dict["create_time"]=[]
+				ret_dict["voice_id"]=[]
 				if queryset:
 					for item in queryset:
-						ret_dict["senders_weixin"].append(item["from_user"]["weixin_id"])
-						ret_dict["senders_userId"].append(item["from_user"]["username"])
-						ret_dict["create_time"].append(utcdatatime2utctimestamp(item["create_time"]))
-						ret_dict["voice_id"].append(item["voice_id"])
-					ret_dict["latest_create_time"] = queryset[-1]["create_time"]
+						ret_dict["senders_weixin"].append(item.from_user.weixin_id)
+						ret_dict["senders_userId"].append(item.from_user.username)
+						ret_dict["create_time"].append(utcdatetime2utctimestamp(item.create_time))
+						ret_dict["voice_id"].append(item.voice_id)
+					ret_dict["latest_create_time"] = utcdatetime2utctimestamp(queryset.last().create_time)
 					return True, ret_dict
 				else:
 					return True, noNewMsgReply()
 			else:
 				#sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time
 				logger.debug('sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time')
-				status.lastest_syncfromdevice_time = datetime.utcfromtimestamp(sync_mark)
+				status.lastest_syncfromdevice_time = utctimestamp2utcdatetime(sync_mark)
 				status.save()
 				return True, noNewMsgReply()
 				
@@ -155,7 +161,7 @@ class DBWrapper:
 				return True, noNewMsgReply()
 
 			except DeviceInfo.DoesNotExist:
-				debuginfo = "DeviceStatus table doesn't contain this deviceId" + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
+				debuginfo = "DeviceStatus table doesn't contain this deviceId; " + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
 				logger.debug(debuginfo)
 				ret_dict = {}
 				ret_dict["errcode"] = 4

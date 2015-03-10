@@ -24,10 +24,11 @@ class DeviceHttpHandler:
             #check the sync_mark is 
             if post_json.has_key("mac") and post_json.has_key("sync_mark"):
                 noexception, response = DBWrapper.getUnSyncedMsgs(post_json["mac"], post_json["sync_mark"])
-                if noexception:
+                devicelogger.debug(response)
+		if noexception:
                     return HttpResponse(json.dumps(response))
                 else:
-                    return HttpRespnse(content=json.dumps(response), status=400)
+                    return HttpResponse(content=json.dumps(response), status=400)
             else:
                 ret = {}
                 ret["errcode"] = 2
