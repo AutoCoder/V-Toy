@@ -76,6 +76,7 @@ class ChatImages(models.Model):
 class DeviceStatus(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
     device_id = models.CharField(max_length=64, unique=True)
+    mac = models.CharField(max_length=64, unique=True)
     lastest_syncfromdevice_time = models.DateTimeField()
     latest_msg_receive_time = models.DateTimeField()
     class Meta:

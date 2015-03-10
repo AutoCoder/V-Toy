@@ -12,15 +12,27 @@ class DeviceHttpHandler:
     def handleQueryNewMsg(request):
         devicelogger.debug("on queryNewMsg")
         devicelogger.debug(request.method)
-	if request.method != "POST":
+        if request.method != "POST":
             ret = {}
             ret["errcode"] = 1
             ret["errmsg"] = "please use httpmethod - 'POST'."
             return HttpResponse(json.dumps(ret))
         else:
-	    devicelogger.debug(request.body)
+            devicelogger.debug(request.body)
             post_json = json.loads(request.body)
-            return HttpResponse("[Test] : %s" % json.dumps(post_json))
+
+            #check the sync_mark is 
+            if post_json.has_key("mac") and post_json.has_key("sync_mark"):
+                noexception, response = DBWrapper.getUnSyncedMsgs(post_json["mac"], post_json["sync_mark"])
+                if noexception:
+                    return HttpResponse(json.dumps(response))
+                else:
+                    return HttpRespnse(content=json.dumps(response), status=400)
+            else:
+                ret = {}
+                ret["errcode"] = 2
+                ret["errmsg"] = "The post json need contain both keys %s and %s" % ("mac", "sync_mark")
+                return HttpResponse(json.dumps(ret))
 
     @staticmethod
     def handleGetVoice(request, voiceId):
