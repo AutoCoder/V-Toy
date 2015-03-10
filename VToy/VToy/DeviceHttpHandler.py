@@ -1,5 +1,6 @@
 import logging
 import json
+from django.http import HttpResponse
 from WeiXinUtils import WeiXinUtils
 from chat.serializer import DBWrapper
 
@@ -10,13 +11,15 @@ class DeviceHttpHandler:
     @staticmethod
     def handleQueryNewMsg(request):
         devicelogger.debug("on queryNewMsg")
-        if request.method is not "GET":
+        devicelogger.debug(request.method)
+	if request.method != "POST":
             ret = {}
             ret["errcode"] = 1
-            ret["errmsg"] = "please use httpmethod - 'GET'."
+            ret["errmsg"] = "please use httpmethod - 'POST'."
             return HttpResponse(json.dumps(ret))
         else:
-            post_json = json.load(request.raw_post_data)
+	    devicelogger.debug(request.body)
+            post_json = json.loads(request.body)
             return HttpResponse("[Test] : %s" % json.dumps(post_json))
 
     @staticmethod
