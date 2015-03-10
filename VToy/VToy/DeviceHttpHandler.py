@@ -39,8 +39,12 @@ class DeviceHttpHandler:
     def handleGetVoice(request, voiceId):
         devicelogger.debug("on getVoice")
         #may need convert amr to wav before sending to device
-        
-        return HttpResponse("implementing...")
+        devicelogger.debug("voice id is %d" % voiceId)
+        issuccess, resp = DBWrapper.getVoice(voiceId) # before format converting
+        if issuccess:
+            return HttpResponse(content=resp)
+        else:
+            return HttpResponse(status=400, json.dumps(resp))
 
     @staticmethod
     def handleSendMsg(request):

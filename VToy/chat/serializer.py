@@ -168,6 +168,16 @@ class DBWrapper:
 				ret_dict["errmsg"] = debuginfo
 				return False, ret_dict
 
+	@staticmethod
+	def getVoice(voiceId):
+		try:
+			vdata = DeviceInfo.objects.get(id=voiceId).voice_data
+			return True, vdata
+		except ChatVoices.DoesNotExist:
+			ret_dict = {}
+			ret_dict["errcode"] = 5
+			ret_dict["errmsg"] = "This Voice Id doesn't exist in table ChatVoices"
+			return False, ret_dict
 	# @staticmethod
 	# def restoreDeviceVoice(toUser, createTime, deviceId, sessionId, content, msgType='device_voice', formUser='wxgzzh', deviceType=''):
 	# 	"""Note: the content parameter should be binrary. this function will store to db directly."""
