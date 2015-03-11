@@ -79,18 +79,32 @@ class DBWrapper:
 			return False,info
 	
 	@staticmethod
-	def registerDevice(deviceId, macAddress, connectProtocol='4',authKey='', connStrategy='1', closeStrategy='1', cryptMethod='0', authVer='0', manuMacPos='-1', serMacPos='-2'):
+	def registerDevice(deviceId, macAddress, qrticket="", connectProtocol='4',authKey='', connStrategy='1', closeStrategy='1', cryptMethod='0', authVer='0', manuMacPos='-1', serMacPos='-2'):
 		"""
 		store the device info
 		"""
 		try:
-			deviceInfo = DeviceInfo(device_id=deviceId, mac=macAddress, connect_protocol=connectProtocol, auth_key=authKey, conn_strategy=connStrategy, \
-			 close_strategy=closeStrategy, crypt_method=cryptMethod, auth_ver=authVer, manu_mac_pos=manuMacPos, ser_mac_pos=serMacPos)
-			deviceInfo.save()
+			queryset = DeviceInfo.objects.filter(mac=macAddress)
+			if queryset:
+				return False, "This mac is already registed"
+			else:
+				deviceInfo = DeviceInfo(device_id=deviceId, mac=macAddress, qr_ticket=qrticket, connect_protocol=connectProtocol, auth_key=authKey, conn_strategy=connStrategy, \
+				 close_strategy=closeStrategy, crypt_method=cryptMethod, auth_ver=authVer, manu_mac_pos=manuMacPos, ser_mac_pos=serMacPos)
+				deviceInfo.save()
 
-			return True,None
+			return True, "Regist successfully"
 		except Exception,info: 
 			return False,info
+
+	@staticmethod
+	def getQRTicket(macAddress):
+		"""
+		return qrticket
+		"""
+		try:
+			return DeviceInfo.objects.get(mac=macAddress).qr_ticket
+		except DeviceInfo.DoesNotExist:
+			return None
 
 	@staticmethod
 	def getUnSyncedMsgs(macaddress, sync_mark):

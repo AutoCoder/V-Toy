@@ -86,6 +86,7 @@ class DeviceInfo(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
     device_id = models.CharField(max_length=64, unique=True)
     mac = models.CharField(max_length=64, unique=True)
+    qr_ticket = = models.CharField(max_length=128, unique=True)
     connect_protocol = models.CharField(max_length=8, default='4')
     auth_key = models.CharField(max_length=64)
     conn_strategy = models.CharField(max_length=1, default='1')
