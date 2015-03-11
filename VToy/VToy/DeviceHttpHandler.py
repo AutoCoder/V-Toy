@@ -69,45 +69,55 @@ class DeviceHttpHandler:
             ret["errmsg"] = "please use pass mac address by POST"
             return HttpResponse(json.dumps(ret))
 
-        deviceId, qrTicket = WeiXinUtils.genDeviceIdAndQRTicket()
         macaddress = request.POST["mac"]
+        #check the passed mac is registed to WX (already existed in db)
+        qrTicket = DBWrapper.getQRTicket(macaddress)
 
-        Devicelist = dict()
-        Devicelist["device_num"] = '1'
-
-        Devicelist["device_list"] = []
-        deviceinfo = WeiXinUtils.DeviceInfo(devId=deviceId,mac=macaddress)
-        Devicelist["device_list"].append(deviceinfo)
-        Devicelist['op_type'] = '0'
-        devicelogger.debug(Devicelist)
-
-        issuccess, authorizeInfo = WeiXinUtils.authorizeDevice(Devicelist)
-        db_related_info=""
-        if issuccess:
-            # if authorizeDevice success, then store the DeviceInfo to db
-            issuccess, db_related_info = DBWrapper.registerDevice(deviceId=deviceinfo['id'], macAddress=deviceinfo['mac'])
-
-        if issuccess:
-            from Public.Utils import genQRImage
-            ret, filepath = genQRImage(macaddress, qrTicket)
-            if ret == 0:
-                #success
-                f = open(filepath, 'rb')
-                data = f.read()
-                response = HttpResponse(data, content_type='image/png')
-                response['Content-Disposition'] = 'attachment; filename=%s.png' % macaddress 
-                f.close()
-		import os
-		os.remove(filepath)
-                return response
-            else:
-                resp = {}
-                resp["errcode"] = 6
-                resp["errmsg"] = "[authorize] %s; [db] %s; [qrencode] errcode:%d" % (authorizeInfo, db_related_info, ret)
-                return HttpResponse(content=json.dumps(resp), status=500)
-            
+        if qrTicket:
+            devicelogger.debug("This mac is already registed to WX and restored into db")
         else:
-            ret = dict()
-            ret["errcode"] = 123;
-            ret["errmsg"] = "[authorizeDevice]: %s; [db_related]: %s" % (authorizeInfo, db_related_info)
-            return HttpResponse(json.dumps(ret))
+            deviceId, qrTicket = WeiXinUtils.genDeviceIdAndQRTicket()
+
+            Devicelist = dict()
+            Devicelist["device_num"] = '1'
+
+            Devicelist["device_list"] = []
+            deviceinfo = WeiXinUtils.DeviceInfo(devId=deviceId,mac=macaddress)
+            Devicelist["device_list"].append(deviceinfo)
+            Devicelist['op_type'] = '0'
+            devicelogger.debug(Devicelist)
+
+            issuccess, authorizeInfo = WeiXinUtils.authorizeDevice(Devicelist)
+
+            if issuccess:
+                # if authorizeDevice success, then store the DeviceInfo to db
+                issuccess, db_related_info = DBWrapper.registerDevice(deviceId=deviceinfo['id'], macAddress=deviceinfo['mac'], qrTicket)
+                if not issuccess:
+                    ret = {}
+                    ret["errcode"] = 6
+                    ret["errmsg"] = "[db] %s" % db_related_info
+                    return HttpResponse(content=json.dumps(ret), status=500)
+            else:
+                ret = dict()
+                ret["errcode"] = 7;
+                ret["errmsg"] = "[authorizeDevice] %s" % authorizeInfo
+                return HttpResponse(content=json.dumps(ret), status=500)
+
+
+        from Public.Utils import genQRImage
+        ret, filepath = genQRImage(macaddress, qrTicket)
+        if ret == 0:
+            #success
+            f = open(filepath, 'rb')
+            data = f.read()
+            response = HttpResponse(data, content_type='image/png')
+            response['Content-Disposition'] = 'attachment; filename=%s.png' % macaddress 
+            f.close()
+    		import os
+    		os.remove(filepath)
+            return response
+        else:
+            resp = {}
+            resp["errcode"] = 8
+            resp["errmsg"] = "[qrencode] errcode:%d" % ret
+            return HttpResponse(content=json.dumps(resp), status=500)
