@@ -84,7 +84,7 @@ class DeviceHttpHandler:
             Devicelist["device_list"] = []
             deviceinfo = WeiXinUtils.DeviceInfo(devId=deviceId,mac=macaddress)
             Devicelist["device_list"].append(deviceinfo)
-            Devicelist['op_type'] = '0'
+            Devicelist['op_type'] = '1'
             devicelogger.debug(Devicelist)
 
             issuccess, authorizeInfo = WeiXinUtils.authorizeDevice(Devicelist)
