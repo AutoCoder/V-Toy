@@ -192,20 +192,3 @@ class DBWrapper:
 			ret_dict["errcode"] = 5
 			ret_dict["errmsg"] = "This Voice Id doesn't exist in table ChatVoices"
 			return False, ret_dict
-	# @staticmethod
-	# def restoreDeviceVoice(toUser, createTime, deviceId, sessionId, content, msgType='device_voice', formUser='wxgzzh', deviceType=''):
-	# 	"""Note: the content parameter should be binrary. this function will store to db directly."""
-
-	# 	chatobj = ChatDeviceToWx(to_user=toUser, session_id=sessionId, create_time=createTime, device_id=deviceId, device_type=deviceType)
-	# 	if msgType == 'device_voice':
-	# 		chatobj.message_type = 0
-	# 	elif msgType == 'device_text':
-	# 		chatobj.message_type = 1
-	# 	elif msgType == 'device_image':
-	# 		chatobj.message_type = 2
-
-	# 	voice = ChatVoices(voice_data=content)
-	# 	voice.save()
-
-	# 	chatobj.voice_id = voice.id
-	# 	chatobj.save()

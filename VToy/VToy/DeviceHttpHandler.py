@@ -88,15 +88,17 @@ class DeviceHttpHandler:
             devicelogger.debug(Devicelist)
 
             issuccess, authorizeInfo = WeiXinUtils.authorizeDevice(Devicelist)
-
+            devicelogger.debug(authorizeInfo)
             if issuccess:
                 # if authorizeDevice success, then store the DeviceInfo to db
-                issuccess, db_related_info = DBWrapper.registerDevice(deviceId=deviceinfo['id'], macAddress=deviceinfo['mac'], qrTicket)
+                issuccess, db_related_info = DBWrapper.registerDevice(deviceId=deviceinfo['id'], macAddress=deviceinfo['mac'], qrticket=qrTicket)
+                devicelogger.debug(db_related_info)
                 if not issuccess:
                     ret = {}
                     ret["errcode"] = 6
                     ret["errmsg"] = "[db] %s" % db_related_info
                     return HttpResponse(content=json.dumps(ret), status=500)
+                devicelogger.debug("qrticket is %s" % qrTicket)
             else:
                 ret = dict()
                 ret["errcode"] = 7;
@@ -113,8 +115,8 @@ class DeviceHttpHandler:
             response = HttpResponse(data, content_type='image/png')
             response['Content-Disposition'] = 'attachment; filename=%s.png' % macaddress 
             f.close()
-    		import os
-    		os.remove(filepath)
+            import os
+            os.remove(filepath)
             return response
         else:
             resp = {}
