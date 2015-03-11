@@ -85,20 +85,22 @@ class DeviceHttpHandler:
         db_related_info=""
         if issuccess:
             # if authorizeDevice success, then store the DeviceInfo to db
-            issuccess, db_related_info = DBWrapper.registerDevice(deviceId=DeviceInfo['id'], macAddress=DeviceInfo['mac'])
+            issuccess, db_related_info = DBWrapper.registerDevice(deviceId=deviceinfo['id'], macAddress=deviceinfo['mac'])
 
         if issuccess:
-            from Public.Utils import GenQRImage
-            ret, filepath = GenQRImage(macaddress, qrTicket)
+            from Public.Utils import genQRImage
+            ret, filepath = genQRImage(macaddress, qrTicket)
             if ret == 0:
                 #success
                 f = open(filepath, 'rb')
                 data = f.read()
                 response = HttpResponse(data, content_type='image/png')
-                response['Content-Disposition'] = 'attachment; filename=%s.wav' % macaddress 
+                response['Content-Disposition'] = 'attachment; filename=%s.png' % macaddress 
                 f.close()
+		import os
+		os.remove(filepath)
                 return response
-            else
+            else:
                 resp = {}
                 resp["errcode"] = 6
                 resp["errmsg"] = "[authorize] %s; [db] %s; [qrencode] errcode:%d" % (authorizeInfo, db_related_info, ret)

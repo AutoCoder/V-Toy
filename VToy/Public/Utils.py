@@ -1,5 +1,6 @@
 from datetime import datetime
 import calendar
+import os
 
 def utcdatetime2utctimestamp(date_time):
 	return calendar.timegm(date_time.utctimetuple())
@@ -15,5 +16,6 @@ def genQRImage(macAddress, qrTicket, path=''):
 		filepath = path + '/' + macAddress
 	else:
 		filepath = './' + macAddress
-	cmd = 'qrencode -o %s.png -v 5 -l Q "%s"' % (filepath, qrTicket)
+	filepath += '.png'
+	cmd = 'qrencode -o %s -v 5 -l Q "%s"' % (filepath, qrTicket)
 	return os.system(cmd), filepath
