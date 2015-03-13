@@ -170,7 +170,9 @@ class DBWrapper:
 			deviceId=None
 			try:
 				deviceId = DeviceInfo.objects.get(mac=macaddress).device_id
-				deviceInfo = DeviceStatus(device_id=deviceId, mac=macaddress, lastest_syncfromdevice_time=utc_begin_datetime, latest_msg_receive_time=utc_begin_datetime)
+				deviceInfo = DeviceStatus(device_id=deviceId, mac=macaddress, \
+					lastest_syncfromdevice_time=DBWrapper.utc_begin_datetime, \
+					latest_msg_receive_time=DBWrapper.utc_begin_datetime)
 				deviceInfo.save()
 				return True, noNewMsgReply()
 
