@@ -1,6 +1,8 @@
+import os
 import time
 import requests
 from WeixinSettings import APP_ID, APP_SECRET, ACCESSTOKEN_EXPIRE
+
 
 class WeiXinUtils:
     """
@@ -43,19 +45,21 @@ class WeiXinUtils:
             print False, ("restore voice failed with error msg : %s" % resp_json["errmsg"])
 
     @staticmethod
-    def UploadMedia(mediaType="voice", filename=""):
+    def UploadMedia(mediaPath="", mediaType="voice"):
         mediaId = ""
         url_params = {
             "access_token" : WeiXinUtils.getaccesstoken(),
             "type" : mediaType,
-            "media" : filename,
-            }      
-        r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params)
+            }
+
+        mediaPath = os.path.dirname(__file__) + '\winlogoff.wav'
+        fromData = { 'media' : mediaPath }
+        r = requests.post("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params, data=fromData)
         response_json = r.json()
         if response_json.has_key("media_id"):
-            return mediaId
+            return True, response_json['media_id']
         else:
-            print "upload media failed with error msg : %s" % r.json()["errmsg"]
+            return False, "upload media failed with error msg : %s" % response_json["errmsg"]
 
     @staticmethod
     def receivefromDeviceMsg(msg):
@@ -296,3 +300,6 @@ class WeiXinUtils:
         DeviceInfo['ser_mac_pos'] = ser_mac_pos
 
         return DeviceInfo
+
+
+print WeiXinUtils.UploadMedia()

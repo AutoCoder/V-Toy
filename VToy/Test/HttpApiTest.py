@@ -20,14 +20,14 @@ def downloadvoice():
 
 def getUnsyncedMessage():
 	post_data = {
-		"mac" : "123456789ABC",
+		"mac" : "3332553390AB",
 		"sync_mark" : 0,
 	}	
 	r = requests.post("http://121.40.99.4/vtoy/messages/", data=json.dumps(post_data))
 	print "HTTP API status code : %d" % r.status_code
-	with open("messages.html", "w") as code:
+	with open("messages.json", "w") as code:
 		code.write(r.content)
 
-# downloadQRImage()
-# downloadvoice()
+downloadQRImage()
+downloadvoice()
 getUnsyncedMessage()

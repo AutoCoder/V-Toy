@@ -51,13 +51,15 @@ class ChatDeviceToWx(models.Model):
     device_type = models.CharField(max_length=32)
     voice_id = models.IntegerField(null=True)
     text_id = models.IntegerField(null=True)
-    image_id = models.IntegerField(null=True)    
+    image_id = models.IntegerField(null=True)
+    is_posted = models.BooleanField(default=False)
     class Meta:
         db_table = 'chat_device2wx'
 
 class ChatVoices(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
     voice_data = models.BinaryField()
+    voice_format = models.CharField(max_length=8) #amr wav
     class Meta:
         db_table = 'chat_voice'
 

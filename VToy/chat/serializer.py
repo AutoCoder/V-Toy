@@ -79,6 +79,27 @@ class DBWrapper:
 			return False,info
 	
 	@staticmethod
+	def receiveDeviceVoice(macAddress, userName, weixinId, format, deviceType, rawdata):
+		try:
+			deviceInfo = DeviceInfo.objects.get(mac=macAddress)
+			userobj = VToyUser.objects.get(weixin_id=weixinId, username=userName)
+
+			audio = ChatVoices(voice_data=rawdata, voice_format=format)
+			audio.save()
+
+			chatobj = ChatDeviceToWx(to_user=userobj, message_type='0', device_id=deviceInfo.device_id, device_type=deviceType\
+				voice_id=audio.id)
+			chatobj.save()
+			return True, "Successfully"
+		except DeviceInfo.DoesNotExist:
+			logger.debug("device info doesn't exist")
+			return False, "This device have not been registed to wx mp"
+		except VToyUser.DoesNotExist:
+			logger.debug("user doesn't exist")
+			return False, "This user have not been communicated with our wx mp"
+
+
+	@staticmethod
 	def registerDevice(deviceId, macAddress, qrticket="", connectProtocol='4',authKey='', connStrategy='1', closeStrategy='1', cryptMethod='0', authVer='0', manuMacPos='-1', serMacPos='-2'):
 		"""
 		store the device info

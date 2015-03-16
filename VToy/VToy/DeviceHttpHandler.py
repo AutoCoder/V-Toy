@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse
 from WeiXinUtils import WeiXinUtils
 from chat.serializer import DBWrapper
+from WeiXinSettings import MP_ID
 
 devicelogger = logging.getLogger('consolelogger')
 
@@ -49,6 +50,23 @@ class DeviceHttpHandler:
     @staticmethod
     def handleSendMsg(request):
         devicelogger.debug("on handleSendMsg")
+        if request.method != "POST":
+            ret = {}
+            ret["errcode"] = 1
+            ret["errmsg"] = "please use httpmethod - 'POST'"
+            return HttpResponse(json.dumps(ret))
+        else:
+            mac = request.META['mac']
+            user_name = request.META['username']
+            weixin_id = request.META['weixinId']
+            vformat = request.META['format']
+
+            isSuccess, info = DBWrapper.receiveDeviceVoice(macAddress=mac, userName=user_name, weixinId=weixin_id, \
+                format=vformat, deviceType=MP_ID, rawdata=request.body)
+
+            #upload media to wx 
+            
+
         return HttpResponse("implementing...")
 
     @staticmethod
