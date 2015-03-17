@@ -56,15 +56,40 @@ class DeviceHttpHandler:
             ret["errmsg"] = "please use httpmethod - 'POST'"
             return HttpResponse(json.dumps(ret))
         else:
+            from datetime import datetime
+            now_time = datetime.utcnow()
             mac = request.META['mac']
             user_name = request.META['username']
             weixin_id = request.META['weixinId']
             vformat = request.META['format']
+            isImmediateReply = DBWrapper.IsReplyIn48Hours(now_time, mac)
 
-            isSuccess, info = DBWrapper.receiveDeviceVoice(macAddress=mac, userName=user_name, weixinId=weixin_id, \
-                format=vformat, deviceType=MP_ID, rawdata=request.body)
+            isSuccess, dberrInfo = DBWrapper.receiveDeviceVoice(macAddress=mac, userName=user_name, weixinId=weixin_id, \
+                format=vformat, deviceType=MP_ID, rawdata=request.body, isPosted=isImmediateReply)
 
-            #upload media to wx 
+            if isImmediateReply:
+                # convert wav to amr 
+                # rawdata = convert(request.body)
+                rawdata = open('winlogoff.amr', 'rb')
+                # upload media to wx 
+                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(mediaData=rawdata)
+                if media_id: #upload media success
+                    isSuccess, errInfo = WeiXinUtils.sendCSVoiceMsg(mediaId=media_id, openId=weixin_id)
+                    if isSuccess:
+                        ret = { "is_posted" : 1 }
+                        return HttpResponse(json.dumps(ret))
+                else: # upload media fail
+                    errmsg = "[dberrInfo] %s ; [uploaderrInfo] %s " % (dberrInfo, uploaderrInfo)
+                    ret = {
+                        "errcode" : 2,
+                        "errmsg" : errmsg,
+                    }
+                    return HttpResponse(json.dumps(ret))
+            else:
+                ret = { "is_posted" : 0 }
+                return HttpResponse(json.dumps(ret))
+
+
             
 
         return HttpResponse("implementing...")

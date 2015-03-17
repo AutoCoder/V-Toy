@@ -79,7 +79,7 @@ class DBWrapper:
 			return False,info
 	
 	@staticmethod
-	def receiveDeviceVoice(macAddress, userName, weixinId, format, deviceType, rawdata):
+	def receiveDeviceVoice(macAddress, userName, weixinId, format, deviceType, rawdata, isPosted):
 		try:
 			deviceInfo = DeviceInfo.objects.get(mac=macAddress)
 			userobj = VToyUser.objects.get(weixin_id=weixinId, username=userName)
@@ -88,7 +88,7 @@ class DBWrapper:
 			audio.save()
 
 			chatobj = ChatDeviceToWx(to_user=userobj, message_type='0', device_id=deviceInfo.device_id, device_type=deviceType\
-				voice_id=audio.id)
+				voice_id=audio.id, is_posted=isPosted)
 			chatobj.save()
 			return True, "Successfully"
 		except DeviceInfo.DoesNotExist:
@@ -215,3 +215,13 @@ class DBWrapper:
 			ret_dict["errcode"] = 5
 			ret_dict["errmsg"] = "This Voice Id doesn't exist in table ChatVoices"
 			return False, ret_dict
+
+	@staticmethod
+	def IsReplyIn48Hours(nowTime, macAddress):
+		try:
+			statusInfo = DeviceStatus.objects.get(mac=macAddress)
+			timedelta = nowTime - statusInfo.latest_msg_receive_time
+			return timedelta.total_seconds() < 48 * 3600
+		except DeviceStatus.DoesNotExist:
+			return False, "No device status for %s existed." % macAddress
+

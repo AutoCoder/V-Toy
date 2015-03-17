@@ -45,21 +45,23 @@ class WeiXinUtils:
             print False, ("restore voice failed with error msg : %s" % resp_json["errmsg"])
 
     @staticmethod
-    def UploadMedia(mediaPath="", mediaType="voice"):
+    def UploadMedia(mediaData=None, mediaType="voice"):
         mediaId = ""
         url_params = {
             "access_token" : WeiXinUtils.getaccesstoken(),
             "type" : mediaType,
             }
 
-        mediaPath = os.path.dirname(__file__) + '\winlogoff.wav'
-        fromData = { 'media' : mediaPath }
-        r = requests.post("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params, data=fromData)
+        #mediaData = open('winlogoff.amr', 'rb')
+        rawdata = {'media': mediaData}
+
+        r = requests.post("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params, files=rawdata) 
+
         response_json = r.json()
         if response_json.has_key("media_id"):
-            return True, response_json['media_id']
+            return response_json['media_id'],"Successfully"
         else:
-            return False, "upload media failed with error msg : %s" % response_json["errmsg"]
+            return None, "upload media failed with error msg : %s" % response_json["errmsg"]
 
     @staticmethod
     def receivefromDeviceMsg(msg):
@@ -262,6 +264,27 @@ class WeiXinUtils:
             return resp_json['device_list']
         else:
             return []
+
+    @staticmethod
+    def sendCSVoiceMsg(mediaId, openId):
+        postData = {
+            "touser" : openId,
+            "msgtype" : "voice",
+            "voice" : {
+                "media_id" : mediaId
+            }
+        }
+        try:
+            url_params = {
+                "access_token" : WeiXinUtils.getaccesstoken(),
+            }
+
+            r = requests.post("https://api.weixin.qq.com/cgi-bin/message/custom/send", params=url_params, data=postData)
+            #resp_json = r.json()
+            return True, None
+        except Exception,info:
+            return False, info
+
 
     @staticmethod
     def DeviceInfo(devId="001",mac="123456789ABC",connect_protocol="4", \
