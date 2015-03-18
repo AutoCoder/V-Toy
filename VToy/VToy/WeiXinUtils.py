@@ -45,17 +45,17 @@ class WeiXinUtils:
             print False, ("restore voice failed with error msg : %s" % resp_json["errmsg"])
 
     @staticmethod
-    def UploadMedia(mediaData=None, mediaType="voice"):
+    def UploadMedia(mediaFile=filename, mediaType="voice"):
         mediaId = ""
         url_params = {
             "access_token" : WeiXinUtils.getaccesstoken(),
             "type" : mediaType,
             }
 
-        #mediaData = open('winlogoff.amr', 'rb')
-        rawdata = {'media': mediaData}
+        mediafp = open(filename, 'rb')
+        mediafile = {'media': mediafp}
 
-        r = requests.post("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params, files=rawdata) 
+        r = requests.post("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params, files=mediafile) 
 
         response_json = r.json()
         if response_json.has_key("media_id"):

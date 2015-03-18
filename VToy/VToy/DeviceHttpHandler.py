@@ -70,10 +70,19 @@ class DeviceHttpHandler:
 
             if isImmediateReply:
                 # convert wav to amr 
+                with open("temp.wav", "wb") as fp:
+                    fp.write(request.body)
+                    fp.close()
+                mfile = "temp.wav"
                 # rawdata = convert(request.body)
-                #rawdata = open('winlogoff.amr', 'rb')
+                # rawdata = open('winlogoff.amr', 'rb')
+                
                 # upload media to wx 
-                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(mediaData=request.body)
+                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(mediaFile=mfile)
+                #clean
+                import os
+                os.remove(mfile)
+
                 devicelogger.debug("uploaderrInfo:%s" % uploaderrInfo)
 
                 if media_id: #upload media success
