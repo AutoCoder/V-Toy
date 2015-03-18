@@ -221,7 +221,7 @@ class DBWrapper:
 		try:
 			statusInfo = DeviceStatus.objects.get(mac=macAddress)
 			timedelta = nowTime - statusInfo.latest_msg_receive_time
-			return timedelta.total_seconds() < 48 * 3600
+			return timedelta.total_seconds() < 48 * 3600 , None
 		except DeviceStatus.DoesNotExist:
 			return False, "No device status for %s existed." % macAddress
 

@@ -66,6 +66,7 @@ class DeviceHttpHandler:
 
             isSuccess, dberrInfo = DBWrapper.receiveDeviceVoice(macAddress=mac, userName=user_name, weixinId=weixin_id, \
                 format=vformat, deviceType=MP_ID, rawdata=request.body, isPosted=isImmediateReply)
+            devicelogger.debug("dberrInfo:%s" % dberrInfo)
 
             if isImmediateReply:
                 # convert wav to amr 
@@ -73,8 +74,12 @@ class DeviceHttpHandler:
                 rawdata = open('winlogoff.amr', 'rb')
                 # upload media to wx 
                 media_id, uploaderrInfo = WeiXinUtils.UploadMedia(mediaData=rawdata)
+                devicelogger.debug("uploaderrInfo:%s" % uploaderrInfo)
+
                 if media_id: #upload media success
                     isSuccess, errInfo = WeiXinUtils.sendCSVoiceMsg(mediaId=media_id, openId=weixin_id)
+                    devicelogger.debug("errInfo:%s" % errInfo)
+
                     if isSuccess:
                         ret = { "is_posted" : 1 }
                         return HttpResponse(json.dumps(ret))
@@ -88,11 +93,6 @@ class DeviceHttpHandler:
             else:
                 ret = { "is_posted" : 0 }
                 return HttpResponse(json.dumps(ret))
-
-
-            
-
-        return HttpResponse("implementing...")
 
     @staticmethod
     def handleRegisterDevice(request):
