@@ -45,7 +45,7 @@ class WeiXinUtils:
             print False, ("restore voice failed with error msg : %s" % resp_json["errmsg"])
 
     @staticmethod
-    def UploadMedia(mediaFile=filename, mediaType="voice"):
+    def UploadMedia(filename, mediaType="voice"):
         mediaId = ""
         url_params = {
             "access_token" : WeiXinUtils.getaccesstoken(),
