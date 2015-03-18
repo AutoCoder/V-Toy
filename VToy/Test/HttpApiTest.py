@@ -30,10 +30,10 @@ def getUnsyncedMessage():
 
 def sendMsgFromDevice():
 	headers = {
-		'mac': '3332553390AB',
-		'username' : 'o2lw_t7-SnZTALxfBY-Q4JLskikc',
-		'weixinId' : 'o2lw_t7-SnZTALxfBY-Q4JLskikc',
-		'format' : 'wav'
+		'MAC': '3332553390AB',
+		'USERNAME' : 'o2lw_t7-SnZTALxfBY-Q4JLskikc',
+		'WEIXINID' : 'o2lw_t7-SnZTALxfBY-Q4JLskikc',
+		'FORMAT' : 'wav'
 	}
 	
 	r = requests.post("http://121.40.99.4/vtoy/message/", headers=headers, data=open("winlogoff.wav", "rb"))
