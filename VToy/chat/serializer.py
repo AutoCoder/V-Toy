@@ -87,7 +87,7 @@ class DBWrapper:
 			audio = ChatVoices(voice_data=rawdata, voice_format=format)
 			audio.save()
 
-			chatobj = ChatDeviceToWx(to_user=userobj, message_type='0', device_id=deviceInfo.device_id, device_type=deviceType\
+			chatobj = ChatDeviceToWx(to_user=userobj, message_type='0', device_id=deviceInfo.device_id, device_type=deviceType, \
 				voice_id=audio.id, is_posted=isPosted)
 			chatobj.save()
 			return True, "Successfully"

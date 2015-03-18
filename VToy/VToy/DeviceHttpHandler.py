@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse
 from WeiXinUtils import WeiXinUtils
 from chat.serializer import DBWrapper
-from WeiXinSettings import MP_ID
+from WeixinSettings import MP_ID
 
 devicelogger = logging.getLogger('consolelogger')
 
@@ -32,7 +32,7 @@ class DeviceHttpHandler:
                     return HttpResponse(content=json.dumps(response), status=400)
             else:
                 ret = {}
-                ret["errcode"] = 2
+                eret["errcode"] = 2
                 ret["errmsg"] = "The post json need contain both keys %s and %s" % ("mac", "sync_mark")
                 return HttpResponse(json.dumps(ret))
 
@@ -58,10 +58,11 @@ class DeviceHttpHandler:
         else:
             from datetime import datetime
             now_time = datetime.utcnow()
-            mac = request.META['mac']
-            user_name = request.META['username']
-            weixin_id = request.META['weixinId']
-            vformat = request.META['format']
+	    print request.META
+            mac = request.META['HTTP_MAC']
+            user_name = request.META['HTTP_USERNAME']
+            weixin_id = request.META['HTTP_WEIXINID']
+            vformat = request.META['HTTP_FORMAT']
             isImmediateReply = DBWrapper.IsReplyIn48Hours(now_time, mac)
 
             isSuccess, dberrInfo = DBWrapper.receiveDeviceVoice(macAddress=mac, userName=user_name, weixinId=weixin_id, \
@@ -78,7 +79,7 @@ class DeviceHttpHandler:
                 # rawdata = open('winlogoff.amr', 'rb')
                 
                 # upload media to wx 
-                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(mediaFile=mfile)
+                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(filename=mfile)
                 #clean
                 import os
                 os.remove(mfile)
