@@ -91,6 +91,8 @@ class WeiXinHandler:
             if voice_data == None:
                 raise ValueError("Download voice_data with mediaID - %s failed (retry 3 times)" % msg['MediaId'])
 
+            with open("12345.mp3", "wb") as vfile:
+                vfile.write()
             #2.query the device binded with
             logger.debug("2.query the device binded with")
             devicelist = WeiXinUtils.queryDeviceInfoByOpenID(open_id)

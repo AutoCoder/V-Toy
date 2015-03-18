@@ -33,9 +33,10 @@ class WeiXinUtils:
             "access_token" : WeiXinUtils.getaccesstoken(),
             "media_id" : mediaId,
             }        
-        r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params)
+        header = { "content-type" : "audio/mp3" }
+        r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params, headers=header)
         
-        if r.headers["content-type"] == "audio/amr" :
+        if r.headers["content-type"] == "audio/mp3" :
             #filename = "voice_%d.amr" % int(time.time())
             #with open(filename, "wb") as voice:
             #     voice.write(r.content)
