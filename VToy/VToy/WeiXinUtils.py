@@ -325,4 +325,4 @@ class WeiXinUtils:
         return DeviceInfo
 
 
-print WeiXinUtils.UploadMedia()
+print WeiXinUtils.UploadMedia("winlogoff.amr")
