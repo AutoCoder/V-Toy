@@ -33,7 +33,7 @@ class DeviceHttpHandler:
                     return HttpResponse(content=json.dumps(response), status=400)
             else:
                 ret = {}
-                eret["errcode"] = 2
+                ret["errcode"] = 2
                 ret["errmsg"] = "The post json need contain both keys %s and %s" % ("mac", "sync_mark")
                 return HttpResponse(json.dumps(ret))
 
