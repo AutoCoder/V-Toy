@@ -59,7 +59,7 @@ class ChatDeviceToWx(models.Model):
 class ChatVoices(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id') # Field name made lowercase.
     voice_data = models.BinaryField()
-    voice_format = models.CharField(max_length=8) #amr wav
+    voice_format = models.CharField(max_length=8, default='wav') #amr wav
     class Meta:
         db_table = 'chat_voice'
 

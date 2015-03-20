@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from WeiXinUtils import WeiXinUtils
 from chat.serializer import DBWrapper
 from WeixinSettings import MP_ID
+from Public.Utils import wav2amr
 
 devicelogger = logging.getLogger('consolelogger')
 
@@ -71,18 +72,26 @@ class DeviceHttpHandler:
 
             if isImmediateReply:
                 # convert wav to amr 
-                with open("temp.wav", "wb") as fp:
+                import time, os
+                tempwavfilepath = "%d.wav" % int(time.time())
+                with open(tempwavfilepath, "wb") as fp:
                     fp.write(request.body)
                     fp.close()
-                mfile = "temp.wav"
-                # rawdata = convert(request.body)
-                # rawdata = open('winlogoff.amr', 'rb')
+
+                import time
+                issuccess, amrfilepath = wav2amr(tempwavfilepath, "%d.amr" % int(time.time()))
+                if not issuccess:
+                    ret = {
+                        "errcode" : 5,
+                        "errmsg" : "convert wav to amr format failed",
+                    }
+                    return HttpResponse(json.dumps(ret))
                 
+                os.remove(tempwavfilepath) #clean wav temp file             
                 # upload media to wx 
-                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(filename=mfile)
-                #clean
-                import os
-                os.remove(mfile)
+                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(filename=amrfilepath)
+
+                os.remove(amrfilepath) #clean amr
 
                 devicelogger.debug("uploaderrInfo:%s" % uploaderrInfo)
 
