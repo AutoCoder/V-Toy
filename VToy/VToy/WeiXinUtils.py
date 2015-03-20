@@ -2,7 +2,9 @@ import os
 import time
 import requests
 from WeixinSettings import APP_ID, APP_SECRET, ACCESSTOKEN_EXPIRE
-
+import json
+import logging
+logger = logging.getLogger('consolelogger')
 
 class WeiXinUtils:
     """
@@ -34,7 +36,7 @@ class WeiXinUtils:
             "media_id" : mediaId,
             }        
 
-        r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params, headers=header)
+        r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params)
         
         if r.headers["content-type"] == "audio/amr" :
             #filename = "voice_%d.amr" % int(time.time())
@@ -279,9 +281,11 @@ class WeiXinUtils:
             url_params = {
                 "access_token" : WeiXinUtils.getaccesstoken(),
             }
-
-            r = requests.post("https://api.weixin.qq.com/cgi-bin/message/custom/send", params=url_params, data=postData)
+            logger.debug(postData)
+            r = requests.post("https://api.weixin.qq.com/cgi-bin/message/custom/send", params=url_params, data=json.dumps(postData))
             #resp_json = r.json()
+            #logger.debug(r.text)
+            logger.debug(r.content)
             return True, None
         except Exception,info:
             return False, info
