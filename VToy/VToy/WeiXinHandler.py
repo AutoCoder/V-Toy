@@ -6,6 +6,7 @@ from django.template import Template, Context
 from settings import TEMPLATE_DIR
 from WeiXinUtils import *
 from Public.Utils import amr2wav
+from WexinSettings import wx_mp_token
 
 #the below code is for verifing the syntax 
 if __name__ == "__main__":
@@ -24,7 +25,7 @@ class WeiXinHandler:
         """
         This method is for wx api, which will return a signature to make sure this site is for a specified weixin Subscribe-Service
         """
-        token = "v-toy"  # TOKEN setted in weixin
+        token = wx_mp_token  # TOKEN setted in weixin
         signature = request.GET.get('signature', None)
         timestamp = request.GET.get('timestamp', None)
         nonce = request.GET.get('nonce', None)
