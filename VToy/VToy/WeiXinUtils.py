@@ -290,6 +290,16 @@ class WeiXinUtils:
         except Exception,info:
             return False, info
 
+    @staticmethod
+    def getWxUserDetailInfo(openId):
+        url_params = {
+            "access_token" : WeiXinUtils.getaccesstoken(),
+            "openid" : openId
+        }
+
+        r = requests.get("https://api.weixin.qq.com/cgi-bin/user/info", params=url_params)
+        return r.json()
+
 
     @staticmethod
     def DeviceInfo(devId="001",mac="123456789ABC",connect_protocol="4", \
@@ -330,3 +340,4 @@ class WeiXinUtils:
         return DeviceInfo
 
 
+#print WeiXinUtils.getWxUserDetailInfo("o2lw_t7-SnZTALxfBY-Q4JLskikc")
