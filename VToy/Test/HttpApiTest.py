@@ -9,7 +9,8 @@ def downloadQRImage():
 	r = requests.post("http://121.40.99.4/vtoy/qrimage/", data=post_data)
 
 	print "HTTP API status code : %d" % r.status_code
-	with open("qrimage.png", "wb") as code:
+	pngfilename = "%s.png" % post_data["mac"]
+	with open(pngfilename, "wb") as code:
 		code.write(r.content)
 
 def downloadvoice():
