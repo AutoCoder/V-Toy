@@ -1,5 +1,6 @@
 from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo
 from Public.Utils import utcdatetime2utctimestamp, utctimestamp2utcdatetime
+from Public.Error import DBError
 import logging
 
 logger = logging.getLogger('consolelogger')
@@ -10,24 +11,6 @@ class DBWrapper:
 	"""
 	from datetime import datetime
 	utc_begin_datetime = datetime.utcfromtimestamp(0)
-	# @staticmethod
-	# def restoreWxVoice(fromUser, sessionId, createTime, content, msgId, openId, deviceId, toUser='wxgzzh', msgType='device_voice', deviceType=''):
-	# 	"""Note: the cotent parameter is encoded by base64, this function will decode and then store to db."""
-
-	# 	chatobj = ChatWxToDevice(from_user=fromUser, session_id=sessionId, create_time=createTime, device_id=deviceId, device_type=deviceType, msg_id=msgId, open_id=openId)
-
-	# 	if msgType == 'device_voice':
-	# 		chatobj.message_type = 0
-	# 	elif msgType == 'device_text':
-	# 		chatobj.message_type = 1
-	# 	elif msgType == 'device_image':
-	# 		chatobj.message_type = 2
-
-	# 	voice = ChatVoices(voice_data=base64.b64decode(content))
-	# 	voice.save()
-
-	# 	chatobj.voice_id = voice.id
-	# 	chatobj.save()
 
 	@staticmethod
 	def receiveWxVoice(fromuser,createtime,deviceid,devicetype,msgid, vdata):
@@ -144,12 +127,6 @@ class DBWrapper:
 			}
 		"""
 
-		def noNewMsgReply():
-			ret_dict = {}
-			ret_dict["errcode"] = 3
-			ret_dict["errmsg"] = "There is no new msgs received"
-			return ret_dict
-
 		try:
 			status = DeviceStatus.objects.get(mac=macaddress)
 			latest_msg_receive_timestamp = utcdatetime2utctimestamp(status.latest_msg_receive_time)
@@ -176,13 +153,13 @@ class DBWrapper:
 					ret_dict["latest_create_time"] = utcdatetime2utctimestamp(queryset.last().create_time)
 					return True, ret_dict
 				else:
-					return True, noNewMsgReply()
+					return True, DBError["NoNewMsg"]
 			else:
 				#sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time
 				logger.debug('sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time')
 				status.lastest_syncfromdevice_time = utctimestamp2utcdatetime(sync_mark)
 				status.save()
-				return True, noNewMsgReply()
+				return True, DBError["NoNewMsg"]
 				
 		except DeviceStatus.DoesNotExist:
 			# this case may caused by "Nobody have send msg to this device"
@@ -195,15 +172,12 @@ class DBWrapper:
 					lastest_syncfromdevice_time=DBWrapper.utc_begin_datetime, \
 					latest_msg_receive_time=DBWrapper.utc_begin_datetime)
 				deviceInfo.save()
-				return True, noNewMsgReply()
+				return True, DBError["NoNewMsg"]
 
 			except DeviceInfo.DoesNotExist:
 				debuginfo = "DeviceStatus table doesn't contain this deviceId; " + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
 				logger.debug(debuginfo)
-				ret_dict = {}
-				ret_dict["errcode"] = 4
-				ret_dict["errmsg"] = debuginfo
-				return False, ret_dict
+				return False, DBError["DeviceInfoMissing"]
 
 	@staticmethod
 	def getVoice(voiceId):
@@ -211,10 +185,7 @@ class DBWrapper:
 			vdata = ChatVoices.objects.get(id=voiceId).voice_data
 			return True, vdata
 		except ChatVoices.DoesNotExist:
-			ret_dict = {}
-			ret_dict["errcode"] = 5
-			ret_dict["errmsg"] = "This Voice Id doesn't exist in table ChatVoices"
-			return False, ret_dict
+			return False, DBError["ChatVoiceMissing"]
 
 	@staticmethod
 	def IsReplyIn48Hours(nowTime, macAddress):
