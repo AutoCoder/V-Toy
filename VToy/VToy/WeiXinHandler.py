@@ -6,7 +6,7 @@ from django.template import Template, Context
 from settings import TEMPLATE_DIR
 from WeiXinUtils import *
 from Public.Utils import amr2wav
-from WexinSettings import wx_mp_token
+from WeixinSettings import wx_mp_token
 
 #the below code is for verifing the syntax 
 if __name__ == "__main__":
