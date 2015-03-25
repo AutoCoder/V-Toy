@@ -32,3 +32,6 @@ def handleWXHttpRequest(request):
         return HttpResponse(WeiXinHandler.checkSignature(request))
     elif request.method == 'POST':
         return HttpResponse(WeiXinHandler.response_msg(request))
+
+def airkissplaceholder(request):
+	return HttpResponse("welcome to airkiss")

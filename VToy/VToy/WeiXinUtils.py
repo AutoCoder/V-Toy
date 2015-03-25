@@ -1,7 +1,7 @@
 import os
 import time
 import requests
-from WeixinSettings import APP_ID, APP_SECRET, ACCESSTOKEN_EXPIRE
+from WeixinSettings import APP_ID, APP_SECRET, ACCESSTOKEN_EXPIRE, CUSTOM_MENU
 
 
 class WeiXinUtils:
@@ -285,6 +285,15 @@ class WeiXinUtils:
         except Exception,info:
             return False, info
 
+    @staticmethod
+    def createCustomMenu():
+        import json
+        url_params = {
+            "access_token" : WeiXinUtils.getaccesstoken(),
+        }
+        print json.dumps(CUSTOM_MENU)
+        r = requests.post("https://api.weixin.qq.com/cgi-bin/menu/create", params=url_params, data=json.dumps(CUSTOM_MENU))
+        return r.json()
 
     @staticmethod
     def DeviceInfo(devId="001",mac="123456789ABC",connect_protocol="4", \
@@ -325,4 +334,4 @@ class WeiXinUtils:
         return DeviceInfo
 
 
-print WeiXinUtils.UploadMedia()
+print WeiXinUtils.createCustomMenu()
