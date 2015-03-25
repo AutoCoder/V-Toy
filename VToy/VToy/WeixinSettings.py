@@ -12,6 +12,8 @@ ACCESSTOKEN_EXPIRE (unit : second)
 
 """
 
+wx_mp_token = 'vtoy'
+
 APP_ID = "wxe10a58cb12e36d7d"
 
 APP_SECRET = "8643cc7ba2214bfd2b1447601e0078e2"

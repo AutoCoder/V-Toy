@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 from django.template import Template, Context
 from settings import TEMPLATE_DIR
 from WeiXinUtils import *
+from Public.Utils import amr2wav
+from WexinSettings import wx_mp_token
 
 #the below code is for verifing the syntax 
 if __name__ == "__main__":
@@ -23,7 +25,7 @@ class WeiXinHandler:
         """
         This method is for wx api, which will return a signature to make sure this site is for a specified weixin Subscribe-Service
         """
-        token = "v-toy"  # TOKEN setted in weixin
+        token = wx_mp_token  # TOKEN setted in weixin
         signature = request.GET.get('signature', None)
         timestamp = request.GET.get('timestamp', None)
         nonce = request.GET.get('nonce', None)
@@ -71,13 +73,21 @@ class WeiXinHandler:
    
     @staticmethod
     def handleVoiceMsg(msg):
+        """
+        Input parameters: msg which contains 'MediaId', 'FromUserName', 'ToUserName'
+        function steps:
+        1. Download Media by MediaId [will try 3 times], convert it from amr to wav.
+        2. Query the first deviceId binded with [FromUserName], and read the binrary from wav file, 
+            then store them to ChatWxToDevice table. At last, clean the temp file (amr, wav)
+        3. Reply immediately with the received mediaId, This step is only for testing, will be remove later. 
+        """
         #logger.debug("begin voice path")
         #logger.debug(str(msg))
 
         if msg.has_key('MediaId') and msg.has_key('FromUserName') and msg.has_key('ToUserName'):
             open_id = msg["FromUserName"]
 
-            #1.download the media
+            #### [Step-1 begin]
             logger.debug("1.download the media")
             voice_data = None
             # try three times for download media
@@ -91,6 +101,20 @@ class WeiXinHandler:
             if voice_data == None:
                 raise ValueError("Download voice_data with mediaID - %s failed (retry 3 times)" % msg['MediaId'])
 
+            #Save received amr audio as temp file
+            import time, os 
+            amrfilepath = "%d.amr" % int(time.time())
+            with open(amrfilepath, "wb") as amrfile:
+                amrfile.write(voice_data)
+            #convert the amr to wav, and then restore the wav to db
+            issuccess, wavfilepath = amr2wav(amrfilepath, "%d.wav" % int(time.time()))
+            os.remove(amrfilepath) # clean amr temp file which is download from wp platform
+            
+            if not issuccess:
+                raise ValueError("Convert amr to wav fail, so that this msg will not be restored in db")
+
+            #### [Step-1 end]
+            #### [Step-2 begin]
             #2.query the device binded with
             logger.debug("2.query the device binded with")
             devicelist = WeiXinUtils.queryDeviceInfoByOpenID(open_id)
@@ -102,9 +126,15 @@ class WeiXinHandler:
                 time_now = datetime.fromtimestamp(int(msg["CreateTime"]))
                 logger.debug(str(time_now))
 
+                wav_data = None;
+                with open(wavfilepath, "rb") as wavstream:
+                    wav_data = wavstream.read()
+
                 # receiveWxVoice will also update the DeviceStatus [attr : latest_msg_receive_time]
                 issuccess, info = DBWrapper.receiveWxVoice(fromuser=open_id, createtime=time_now, \
-                    deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=voice_data)
+                    deviceid=device_id, devicetype=device_type, msgid=msg["MsgId"], vdata=wav_data)
+                os.remove(wavfilepath) # clean wav intermediate file 
+
                 if issuccess:
                     logger.debug("DBWrapper.receiveWxVoice success!")
                 else:
@@ -115,6 +145,11 @@ class WeiXinHandler:
         else:
             raise KeyError("Can't not found key %s or %s or %s" % ('MediaId', 'FromUserName', 'ToUserName'))
         
+            #### [Step-2 end]
+
+        #### [Step-3 begin]
+        # The below lines of Code is only for testing, will be removed later
+        # [MARCO] TESTING CODE
         logger.debug("After receiveVoice")
         c = Context({
             'ToUserName' : msg['FromUserName'],

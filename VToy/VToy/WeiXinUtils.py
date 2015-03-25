@@ -2,7 +2,9 @@ import os
 import time
 import requests
 from WeixinSettings import APP_ID, APP_SECRET, ACCESSTOKEN_EXPIRE, CUSTOM_MENU
-
+import json
+import logging
+logger = logging.getLogger('consolelogger')
 
 class WeiXinUtils:
     """
@@ -33,6 +35,7 @@ class WeiXinUtils:
             "access_token" : WeiXinUtils.getaccesstoken(),
             "media_id" : mediaId,
             }        
+
         r = requests.get("http://file.api.weixin.qq.com/cgi-bin/media/get", params=url_params)
         
         if r.headers["content-type"] == "audio/amr" :
@@ -45,17 +48,17 @@ class WeiXinUtils:
             print False, ("restore voice failed with error msg : %s" % resp_json["errmsg"])
 
     @staticmethod
-    def UploadMedia(mediaData=None, mediaType="voice"):
+    def UploadMedia(filename, mediaType="voice"):
         mediaId = ""
         url_params = {
             "access_token" : WeiXinUtils.getaccesstoken(),
             "type" : mediaType,
             }
 
-        #mediaData = open('winlogoff.amr', 'rb')
-        rawdata = {'media': mediaData}
+        mediafp = open(filename, 'rb')
+        mediafile = {'media': mediafp}
 
-        r = requests.post("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params, files=rawdata) 
+        r = requests.post("http://file.api.weixin.qq.com/cgi-bin/media/upload", params=url_params, files=mediafile) 
 
         response_json = r.json()
         if response_json.has_key("media_id"):
@@ -278,12 +281,23 @@ class WeiXinUtils:
             url_params = {
                 "access_token" : WeiXinUtils.getaccesstoken(),
             }
-
-            r = requests.post("https://api.weixin.qq.com/cgi-bin/message/custom/send", params=url_params, data=postData)
+            logger.debug(postData)
+            r = requests.post("https://api.weixin.qq.com/cgi-bin/message/custom/send", params=url_params, data=json.dumps(postData))
             #resp_json = r.json()
+            #logger.debug(r.text)
+            logger.debug(r.content)
             return True, None
         except Exception,info:
             return False, info
+
+    def getWxUserDetailInfo(openId):
+        url_params = {
+            "access_token" : WeiXinUtils.getaccesstoken(),
+            "openid" : openId
+        }
+
+        r = requests.get("https://api.weixin.qq.com/cgi-bin/user/info", params=url_params)
+        return r.json()
 
     @staticmethod
     def createCustomMenu():
@@ -334,4 +348,8 @@ class WeiXinUtils:
         return DeviceInfo
 
 
+
 print WeiXinUtils.createCustomMenu()
+
+#print WeiXinUtils.getWxUserDetailInfo("o2lw_t7-SnZTALxfBY-Q4JLskikc")
+

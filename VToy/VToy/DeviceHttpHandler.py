@@ -3,7 +3,9 @@ import json
 from django.http import HttpResponse
 from WeiXinUtils import WeiXinUtils
 from chat.serializer import DBWrapper
-from WeiXinSettings import MP_ID
+from WeixinSettings import MP_ID
+from Public.Utils import wav2amr
+from Public.Error import HttpRequestError, ExternalToolError, CompositeError
 
 devicelogger = logging.getLogger('consolelogger')
 
@@ -14,10 +16,7 @@ class DeviceHttpHandler:
         devicelogger.debug("on queryNewMsg")
         devicelogger.debug(request.method)
         if request.method != "POST":
-            ret = {}
-            ret["errcode"] = 1
-            ret["errmsg"] = "please use httpmethod - 'POST'"
-            return HttpResponse(json.dumps(ret))
+            return HttpResponse(json.dumps(HttpRequestError.HttpMethodWrong("POST")))
         else:
             devicelogger.debug(request.body)
             post_json = json.loads(request.body)
@@ -31,10 +30,7 @@ class DeviceHttpHandler:
                 else:
                     return HttpResponse(content=json.dumps(response), status=400)
             else:
-                ret = {}
-                ret["errcode"] = 2
-                ret["errmsg"] = "The post json need contain both keys %s and %s" % ("mac", "sync_mark")
-                return HttpResponse(json.dumps(ret))
+                return HttpResponse(json.dumps(HttpRequestError.PostJsonKeyMissing("mac","sync_mark")))
 
     @staticmethod
     def handleGetVoice(request, voiceId):
@@ -51,48 +47,55 @@ class DeviceHttpHandler:
     def handleSendMsg(request):
         devicelogger.debug("on handleSendMsg")
         if request.method != "POST":
-            ret = {}
-            ret["errcode"] = 1
-            ret["errmsg"] = "please use httpmethod - 'POST'"
-            return HttpResponse(json.dumps(ret))
+            return HttpResponse(json.dumps(HttpRequestError.HttpMethodWrong("POST")))
         else:
             from datetime import datetime
             now_time = datetime.utcnow()
-            mac = request.META['mac']
-            user_name = request.META['username']
-            weixin_id = request.META['weixinId']
-            vformat = request.META['format']
+	    print request.META
+            mac = request.META['HTTP_MAC']
+            user_name = request.META['HTTP_USERNAME']
+            weixin_id = request.META['HTTP_WEIXINID']
+            vformat = request.META['HTTP_FORMAT']
             isImmediateReply = DBWrapper.IsReplyIn48Hours(now_time, mac)
 
             isSuccess, dberrInfo = DBWrapper.receiveDeviceVoice(macAddress=mac, userName=user_name, weixinId=weixin_id, \
                 format=vformat, deviceType=MP_ID, rawdata=request.body, isPosted=isImmediateReply)
+            devicelogger.debug("dberrInfo:%s" % dberrInfo)
 
             if isImmediateReply:
                 # convert wav to amr 
-                # rawdata = convert(request.body)
-                rawdata = open('winlogoff.amr', 'rb')
+                import time, os
+                tempwavfilepath = "%d.wav" % int(time.time())
+                with open(tempwavfilepath, "wb") as fp:
+                    fp.write(request.body)
+                    fp.close()
+
+                import time
+                issuccess, amrfilepath = wav2amr(tempwavfilepath, "%d.amr" % int(time.time()))
+                if not issuccess:
+                    return HttpResponse(json.dumps(ExternalToolError.ffmpegError("wav", "amr")))
+                
+                os.remove(tempwavfilepath) #clean wav temp file             
                 # upload media to wx 
-                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(mediaData=rawdata)
+                media_id, uploaderrInfo = WeiXinUtils.UploadMedia(filename=amrfilepath)
+
+                os.remove(amrfilepath) #clean amr
+
+                devicelogger.debug("uploaderrInfo:%s" % uploaderrInfo)
+
                 if media_id: #upload media success
                     isSuccess, errInfo = WeiXinUtils.sendCSVoiceMsg(mediaId=media_id, openId=weixin_id)
+                    devicelogger.debug("errInfo:%s" % errInfo)
+
                     if isSuccess:
                         ret = { "is_posted" : 1 }
                         return HttpResponse(json.dumps(ret))
                 else: # upload media fail
                     errmsg = "[dberrInfo] %s ; [uploaderrInfo] %s " % (dberrInfo, uploaderrInfo)
-                    ret = {
-                        "errcode" : 2,
-                        "errmsg" : errmsg,
-                    }
-                    return HttpResponse(json.dumps(ret))
+                    return HttpResponse(json.dumps(CompositeError(errmsg)))
             else:
                 ret = { "is_posted" : 0 }
                 return HttpResponse(json.dumps(ret))
-
-
-            
-
-        return HttpResponse("implementing...")
 
     @staticmethod
     def handleRegisterDevice(request):
@@ -101,16 +104,10 @@ class DeviceHttpHandler:
         """
         devicelogger.debug("on handleRegisterDevice")
         if request.method != "POST":
-            ret = {}
-            ret["errcode"] = 1
-            ret["errmsg"] = "please use httpmethod - 'POST'"
-            return HttpResponse(json.dumps(ret))
+            return HttpResponse(json.dumps(HttpRequestError.HttpMethodWrong("POST")))
 
         if not request.POST.has_key("mac"):
-            ret = {}
-            ret["errcode"] = 2
-            ret["errmsg"] = "please use pass mac address by POST"
-            return HttpResponse(json.dumps(ret))
+            return HttpResponse(json.dumps(HttpRequestError.PostFormKeyMissing("mac")))
 
         macaddress = request.POST["mac"]
         #check the passed mac is registed to WX (already existed in db)
@@ -137,16 +134,12 @@ class DeviceHttpHandler:
                 issuccess, db_related_info = DBWrapper.registerDevice(deviceId=deviceinfo['id'], macAddress=deviceinfo['mac'], qrticket=qrTicket)
                 devicelogger.debug(db_related_info)
                 if not issuccess:
-                    ret = {}
-                    ret["errcode"] = 6
-                    ret["errmsg"] = "[db] %s" % db_related_info
-                    return HttpResponse(content=json.dumps(ret), status=500)
+                    errstr = "[db] %s" % db_related_info
+                    return HttpResponse(content=json.dumps(CompositeError(errstr)), status=500)
                 devicelogger.debug("qrticket is %s" % qrTicket)
             else:
-                ret = dict()
-                ret["errcode"] = 7;
-                ret["errmsg"] = "[authorizeDevice] %s" % authorizeInfo
-                return HttpResponse(content=json.dumps(ret), status=500)
+                errstr = "[authorizeDevice] %s" % authorizeInfo
+                return HttpResponse(content=json.dumps(CompositeError(errstr)), status=500)
 
 
         from Public.Utils import genQRImage
@@ -162,7 +155,4 @@ class DeviceHttpHandler:
             os.remove(filepath)
             return response
         else:
-            resp = {}
-            resp["errcode"] = 8
-            resp["errmsg"] = "[qrencode] errcode:%d" % ret
-            return HttpResponse(content=json.dumps(resp), status=500)
+            return HttpResponse(content=json.dumps(ExternalToolError.qrencodeError(ret)), status=500)
