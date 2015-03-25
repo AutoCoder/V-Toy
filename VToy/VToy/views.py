@@ -7,11 +7,11 @@ def hello(request):
     return HttpResponse("Hello world")
 
 def rtthreadaudio(request):
-	filename = os.path.join(os.path.dirname(__file__),'winlogoff.wav')
+	filename = os.path.join(os.path.dirname(__file__),'123.wav')
 	f = open(filename, 'rb')
 	data = f.read()
 	response = HttpResponse(data, content_type='audio/x-wav')
-	response['Content-Disposition'] = 'attachment; filename=winlogoff.wav' 
+	response['Content-Disposition'] = 'attachment; filename=123.wav' 
 	f.close()
 	return response
 
