@@ -1,7 +1,7 @@
 import os
 import time
 import requests
-from WeixinSettings import APP_ID, APP_SECRET, ACCESSTOKEN_EXPIRE, CUSTOM_MENU
+from WeixinSettings import APP_ID, APP_SECRET, ACCESSTOKEN_EXPIRE, JSTICKET_EXPIRE, CUSTOM_MENU
 import json
 import logging
 logger = logging.getLogger('consolelogger')
@@ -12,12 +12,15 @@ class WeiXinUtils:
     """
     accesstoken = ""
     accesstoken_timestamp = None
+    jsticket = ""
+    jsticket_timestamp = None
 
 
     @staticmethod
     def getaccesstoken():
         cur_timestamp = int(time.time())
         if WeiXinUtils.accesstoken_timestamp and (cur_timestamp - WeiXinUtils.accesstoken_timestamp) < ACCESSTOKEN_EXPIRE and WeiXinUtils.accesstoken:
+            logger.debug("Use cached accesstoken")
             return WeiXinUtils.accesstoken
         url_params = {
             "grant_type" : "client_credential",
@@ -28,6 +31,23 @@ class WeiXinUtils:
         #print(r.url)
         response_json = r.json()
         return response_json["access_token"]
+
+    @staticmethod
+    def getJsTicket():
+        cur_timestamp = int(time.time())
+        if WeiXinUtils.jsticket_timestamp and (cur_timestamp - WeiXinUtils.jsticket_timestamp) < JSTICKET_EXPIRE and WeiXinUtils.jsticket:
+            logger.debug("Use cached jsticket")
+            return WeiXinUtils.jsticket
+
+        url_params = {
+            "access_token" : WeiXinUtils.getaccesstoken(),
+            "type" : "jsapi"
+            }  
+        
+        r = requests.get("https://api.weixin.qq.com/cgi-bin/ticket/getticket", params=url_params)
+        
+        response_json = r.json()
+        return response_json["ticket"]
 
     @staticmethod
     def DownloadMedia(mediaId):
@@ -349,7 +369,6 @@ class WeiXinUtils:
 
 
 
-print WeiXinUtils.createCustomMenu()
+#print WeiXinUtils.createCustomMenu()
 
 #print WeiXinUtils.getWxUserDetailInfo("o2lw_t7-SnZTALxfBY-Q4JLskikc")
-

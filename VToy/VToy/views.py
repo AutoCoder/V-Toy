@@ -1,7 +1,10 @@
 from django.http import HttpResponse
 from datetime import datetime
 from WeiXinHandler import WeiXinHandler
+from WeiXinJs import getJsLogOnInfo
+from WeixinSettings import APP_ID
 import os
+
 
 def hello(request):
     return HttpResponse("Hello world")
@@ -33,5 +36,20 @@ def handleWXHttpRequest(request):
     elif request.method == 'POST':
         return HttpResponse(WeiXinHandler.response_msg(request))
 
+
 def airkissplaceholder(request):
-	return HttpResponse("welcome to airkiss")
+    signdict = getJsLogOnInfo()
+    c = Context({
+    'AppId' : APP_ID,
+    'timestamp': signdict["timestamp"],
+    'nonce': signdict["nonceStr"],
+    'signature' : signdict["signature"],
+    })
+
+    fp = open(TEMPLATE_DIR + '/airkiss_templ')
+    t = Template(fp.read())
+    fp.close()
+
+    reply = t.render(c)
+    return HttpResponse(reply)
+
