@@ -3,6 +3,8 @@ from datetime import datetime
 from WeiXinHandler import WeiXinHandler
 from WeiXinJs import getJsLogOnInfo
 from WeixinSettings import APP_ID
+from django.template import Template, Context
+from settings import TEMPLATE_DIR
 import os
 
 
