@@ -27,7 +27,7 @@ class Sign:
 
 def getJsLogOnInfo():
     from WeiXinUtils import WeiXinUtils
-    signer = Sign(WeiXinUtils.getJsTicket(), "http://121.40.99.4")
+    signer = Sign(WeiXinUtils.getJsTicket(), "http://121.40.99.4/vtoy/airkiss/")
     return signer.sign()
 
 if __name__ == '__main__':

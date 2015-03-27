@@ -20,7 +20,9 @@ wx.config({
 });
 
 wx.ready(function () {
+    alert("before configWXDeviceWiFi");
     wx.configWXDeviceWiFi();
+    alert("after configWXDeviceWiFi");
 });
 
 // $(function () { 
