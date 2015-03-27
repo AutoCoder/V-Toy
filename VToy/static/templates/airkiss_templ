@@ -10,6 +10,16 @@
 <h1>Welcome to airkiss page!</h1>
 <script>
 
+function airkissSet(){
+    WeixinJSBridge.invoke('configWXDeviceWiFi', {}, function(res){
+        if(res.err_msg == "configWXDeviceWiFi:fail"){
+            alert("failed");
+        }else if(res.err_msg == "configWXDeviceWiFi:ok"){
+            alert("Successfully");
+        }
+    });
+}
+
 wx.config({
     debug: true,
     appId: '{{ AppId }}', 
@@ -19,9 +29,11 @@ wx.config({
     jsApiList: [ 'configWXDeviceWiFi', ]
 });
 
+
+
 wx.ready(function () {
     alert("before configWXDeviceWiFi");
-    wx.configWXDeviceWiFi();
+    airkissSet();
     alert("after configWXDeviceWiFi");
 });
 
