@@ -32,16 +32,16 @@ CUSTOM_MENU = {
 	"button":[
 	{
 		"type":"click",
-		"name": "ConnectWIFI",
+		"name": "Command",
 		"key":"VTOY_CONNECT_WIFI"
 	},
 	{
 		"type":"view",
-		"name": "webpage",
+		"name": "Conf-WIFI",
 		"url":"http://121.40.99.4/vtoy/airkiss/"
 	},
 	{
-		"name":"menu",
+		"name":"Menu",
 		"sub_button":[
 		{
 			"type":"view", 

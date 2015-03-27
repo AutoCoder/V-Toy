@@ -325,8 +325,28 @@ class WeiXinUtils:
         url_params = {
             "access_token" : WeiXinUtils.getaccesstoken(),
         }
-        print json.dumps(CUSTOM_MENU)
+
         r = requests.post("https://api.weixin.qq.com/cgi-bin/menu/create", params=url_params, data=json.dumps(CUSTOM_MENU))
+        return r.json()
+
+    @staticmethod
+    def deleteCustomMenu():
+        import json
+        url_params = {
+            "access_token" : WeiXinUtils.getaccesstoken(),
+        }
+
+        r = requests.get("https://api.weixin.qq.com/cgi-bin/menu/delete", params=url_params)
+        return r.json()
+
+    @staticmethod
+    def queryCustomMenu():
+        import json
+        url_params = {
+            "access_token" : WeiXinUtils.getaccesstoken(),
+        }
+
+        r = requests.get("https://api.weixin.qq.com/cgi-bin/menu/get", params=url_params)
         return r.json()
 
     @staticmethod
@@ -368,7 +388,7 @@ class WeiXinUtils:
         return DeviceInfo
 
 
-
+#print WeiXinUtils.deleteCustomMenu()
 #print WeiXinUtils.createCustomMenu()
-
+#print WeiXinUtils.queryCustomMenu()
 #print WeiXinUtils.getWxUserDetailInfo("o2lw_t7-SnZTALxfBY-Q4JLskikc")

@@ -29,17 +29,9 @@ wx.config({
     jsApiList: [ 'configWXDeviceWiFi', ]
 });
 
-
-
 wx.ready(function () {
-    alert("before configWXDeviceWiFi");
     airkissSet();
-    alert("after configWXDeviceWiFi");
 });
-
-// $(function () { 
-// 	wx.configWXDeviceWiFi();
-// }) 
 
 </script>
 </body>
