@@ -1,7 +1,7 @@
 from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo
 from Public.Utils import utcdatetime2utctimestamp, utctimestamp2utcdatetime
 from Public.Error import DBError
-from Public.DeviceSettins import VOICE_COUNT_ONEQUERY
+from Public.DeviceSettings import VOICE_COUNT_ONEQUERY
 import logging
 
 logger = logging.getLogger('consolelogger')
@@ -134,6 +134,11 @@ class DBWrapper:
 			lastest_syncfromdevice_timestamp = utcdatetime2utctimestamp(status.lastest_syncfromdevice_time)
 
 			logger.debug("sync_mark is %d" % sync_mark)
+
+			if sync_mark < lastest_syncfromdevice_timestamp:
+				status.lastest_syncfromdevice_time = utctimestamp2utcdatetime(sync_mark)
+				status.save()
+
 			if sync_mark < latest_msg_receive_timestamp:
 				#sync_mark is before latest_msg_receive_time, so that need to query recent received msgs
 				logger.debug('sync_mark is before latest_msg_receive_time, so that need to query recent received msgs')
@@ -151,15 +156,13 @@ class DBWrapper:
 						ret_dict["senders_userId"].append(item.from_user.username)
 						ret_dict["create_time"].append(utcdatetime2utctimestamp(item.create_time))
 						ret_dict["voice_id"].append(item.voice_id)
-					ret_dict["latest_create_time"] = utcdatetime2utctimestamp(queryset.last().create_time)
+					ret_dict["latest_create_time"] = utcdatetime2utctimestamp(queryset[VOICE_COUNT_ONEQUERY-1].create_time)
 					return True, ret_dict
 				else:
 					return True, DBError["NoNewMsg"]
 			else:
 				#sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time
 				logger.debug('sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time')
-				status.lastest_syncfromdevice_time = utctimestamp2utcdatetime(sync_mark)
-				status.save()
 				return True, DBError["NoNewMsg"]
 				
 		except DeviceStatus.DoesNotExist:
