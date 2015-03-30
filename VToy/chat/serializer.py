@@ -1,4 +1,4 @@
-from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo
+from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo, SubscriptionInfo
 from Public.Utils import utcdatetime2utctimestamp, utctimestamp2utcdatetime
 from Public.Error import DBError
 from Public.DeviceSettings import VOICE_COUNT_ONEQUERY
@@ -82,6 +82,46 @@ class DBWrapper:
 			logger.debug("user doesn't exist")
 			return False, "This user have not been communicated with our wx mp"
 
+	@staticmethod
+	def updateSubscriptionStatus(deviceId, wxOpenId, wxmpId, opType=True):
+		"""
+		opType=1 == subscribed ; opType=0 == unsubscribed 
+    	device_id
+   		wxOpenId 
+    	wxmpId 
+
+		"""
+		try:
+			subp = SubscriptionInfo.objects.get(device_id=deviceId, wx_user=wxOpenId, wx_mp_id=wxmpId)
+			subp.subscribed = opType
+			subp.save()
+			return True, "Modify the subscriptionInfo successfully."
+		except SubscriptionInfo.DoesNotExist:
+			subp = SubscriptionInfo(device_id=deviceId, wx_user=wxOpenId, wx_mp_id=wxmpId, subscribed=opType)
+			subp.save()
+			return True, "Create the subscriptionInfo successfully."
+
+	@staticmethod
+	def updateDeviceConnectStatus(macAddress, deviceStatus):
+		"""
+		deviceStatus # 0--not connected; 1-- connected;
+		"""
+		try:
+			devicestat = DeviceStatus.objects.get(device_id=deviceId, wx_user=wxOpenId, wx_mp_id=wxmpId)
+			devicestat.status = deviceStatus
+			devicestat.save()
+			return True, "update successfully"
+		except DeviceStatus.DoesNotExist:
+			try:
+				deviceInfo = DeviceInfo.objects.get(mac=macAddress)
+			except DeviceInfo.DoesNotExist:
+				debuginfo = "DeviceStatus table doesn't contain this deviceId; " + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
+				logger.debug(debuginfo)
+				return False, debuginfo
+			devicestat = DeviceStatus(device_id=deviceInfo.device_id, mac=macAddress, latest_msg_receive_time=createtime, \
+				lastest_syncfromdevice_time=DBWrapper.utc_begin_datetime, status=deviceStatus)
+			devicestat.save()
+			return True, "create successfully"
 
 	@staticmethod
 	def registerDevice(deviceId, macAddress, qrticket="", connectProtocol='4',authKey='', connStrategy='1', closeStrategy='1', cryptMethod='0', authVer='0', manuMacPos='-1', serMacPos='-2'):
@@ -142,7 +182,6 @@ class DBWrapper:
 				sync_mark = lastest_syncfromdevice_timestamp
 
 			if sync_mark < latest_msg_receive_timestamp:
-				#Don't update the sync_mark for this path, becasue in the server side can't make sure the device side has got the messages successfully or not.
 				#sync_mark is before latest_msg_receive_time, so that need to query recent received msgs
 				logger.debug('sync_mark is before latest_msg_receive_time, so that need to query recent received msgs')
 				sync_datetime = utctimestamp2utcdatetime(sync_mark)

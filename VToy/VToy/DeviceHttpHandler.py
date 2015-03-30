@@ -26,6 +26,11 @@ class DeviceHttpHandler:
                 noexception, response = DBWrapper.getUnSyncedMsgs(post_json["mac"], post_json["sync_mark"])
                 devicelogger.debug(response)
                 if noexception:
+                    # heartbeat : update the device status = alive
+                    # DBWrapper.heartBeat(mac)
+                    # Implemtation:
+                    # 1) query devicestatus, update update_time and status
+                    # 2) if no devicestatus object found, query deviceInfo by mac, and then create an new devicestatus 
                     return HttpResponse(json.dumps(response))
                 else:
                     return HttpResponse(content=json.dumps(response), status=400)

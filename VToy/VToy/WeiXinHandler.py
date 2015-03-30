@@ -61,8 +61,11 @@ class WeiXinHandler:
                 if msg["Event"] == 'bind':
                     pass
                 elif msg["Event"] == 'subscribe_status':
+                    # create subscriptionInfo item in db
+                    # 
                     pass
                 elif msg["Event"] == 'unsubscribe_status':
+                    # modified the subscription item'status in db
                     pass
                 elif msg["Event"] == 'unbind':
                     pass

@@ -20,8 +20,8 @@ CloseStrategy = (
 # Create your models here.
 class VToyUser(models.Model):
     id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=30, unique=True)
-    weixin_id = models.CharField(max_length=30, unique=True)
+    username = models.CharField(max_length=32, unique=True)
+    weixin_id = models.CharField(max_length=32, unique=True)
     class Meta:
         db_table = 'v_toy_user'
 
@@ -81,6 +81,9 @@ class DeviceStatus(models.Model):
     mac = models.CharField(max_length=64, unique=True)
     lastest_syncfromdevice_time = models.DateTimeField()
     latest_msg_receive_time = models.DateTimeField()
+    #
+    update_time = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=1, default='0') # 0--dead; 1--alive;
     class Meta:
         db_table = 'device_status'
 
@@ -100,3 +103,12 @@ class DeviceInfo(models.Model):
     obsolete = models.BooleanField(default=False)
     class Meta:
         db_table = 'device_info'
+
+class SubscriptionInfo(models.Model):
+    id = models.AutoField(primary_key=True, db_column='Id')
+    subscribed = models.BooleanField(default=True)
+    device_id = models.CharField(max_length=64)
+    wx_user = models.CharField(max_length=32)
+    wx_mp_id = models.CharField(max_length=32)
+    class Meta:
+        db_table = 'subscription_info'
