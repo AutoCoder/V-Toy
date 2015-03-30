@@ -126,6 +126,9 @@ class DBWrapper:
 			 "voice_id" : [123, 124, 125 ,126 ,137],
 			 "latest_create_time" : 1421388433,
 			}
+
+		Note: if sync_mark == 0, that mean the device is on first query or the device cached sync_mark is broken/losted, 
+		      so for this case the handler will assign the sync_mark with value of lastest_syncfromdevice_timestamp
 		"""
 
 		try:
@@ -135,11 +138,11 @@ class DBWrapper:
 
 			logger.debug("sync_mark is %d" % sync_mark)
 
-			if sync_mark < lastest_syncfromdevice_timestamp:
-				status.lastest_syncfromdevice_time = utctimestamp2utcdatetime(sync_mark)
-				status.save()
+			if sync_mark >= 0 and sync_mark <= lastest_syncfromdevice_timestamp:
+				sync_mark = lastest_syncfromdevice_timestamp
 
 			if sync_mark < latest_msg_receive_timestamp:
+				#Don't update the sync_mark for this path, becasue in the server side can't make sure the device side has got the messages successfully or not.
 				#sync_mark is before latest_msg_receive_time, so that need to query recent received msgs
 				logger.debug('sync_mark is before latest_msg_receive_time, so that need to query recent received msgs')
 				sync_datetime = utctimestamp2utcdatetime(sync_mark)
@@ -163,6 +166,8 @@ class DBWrapper:
 			else:
 				#sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time
 				logger.debug('sync_mark is after latest_msg_receive_time, no new msgs received, so that only need to update lastest_syncfromdevice_time')
+				status.lastest_syncfromdevice_time = utctimestamp2utcdatetime(sync_mark)
+				status.save()
 				return True, DBError["NoNewMsg"]
 				
 		except DeviceStatus.DoesNotExist:
