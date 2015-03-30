@@ -101,7 +101,7 @@ class DBWrapper:
 			return True, "Create the subscriptionInfo successfully."
 
 	@staticmethod
-	def heartBeat(macAddress, deviceStatus):
+	def heartBeat(macAddress, deviceStatus='1'):
 		"""
 		deviceStatus # 0--not connected; 1-- connected;
 		"""
