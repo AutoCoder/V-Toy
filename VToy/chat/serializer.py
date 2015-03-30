@@ -89,7 +89,6 @@ class DBWrapper:
     	device_id
    		wxOpenId 
     	wxmpId 
-
 		"""
 		try:
 			subp = SubscriptionInfo.objects.get(device_id=deviceId, wx_user=wxOpenId, wx_mp_id=wxmpId)
@@ -102,12 +101,12 @@ class DBWrapper:
 			return True, "Create the subscriptionInfo successfully."
 
 	@staticmethod
-	def updateDeviceConnectStatus(macAddress, deviceStatus):
+	def heartBeat(macAddress, deviceStatus):
 		"""
 		deviceStatus # 0--not connected; 1-- connected;
 		"""
 		try:
-			devicestat = DeviceStatus.objects.get(device_id=deviceId, wx_user=wxOpenId, wx_mp_id=wxmpId)
+			devicestat = DeviceStatus.objects.get(mac=macAddress)
 			devicestat.status = deviceStatus
 			devicestat.save()
 			return True, "update successfully"
@@ -118,7 +117,7 @@ class DBWrapper:
 				debuginfo = "DeviceStatus table doesn't contain this deviceId; " + "DeviceInfo table also doesn't contain this deviceId, so that this device seems have not authrized successfully."
 				logger.debug(debuginfo)
 				return False, debuginfo
-			devicestat = DeviceStatus(device_id=deviceInfo.device_id, mac=macAddress, latest_msg_receive_time=createtime, \
+			devicestat = DeviceStatus(device_id=deviceInfo.device_id, mac=macAddress, latest_msg_receive_time=DBWrapper.utc_begin_datetime, \
 				lastest_syncfromdevice_time=DBWrapper.utc_begin_datetime, status=deviceStatus)
 			devicestat.save()
 			return True, "create successfully"
