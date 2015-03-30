@@ -147,7 +147,6 @@ class DBWrapper:
 				logger.debug('sync_mark is before latest_msg_receive_time, so that need to query recent received msgs')
 				sync_datetime = utctimestamp2utcdatetime(sync_mark)
 				queryset = list(ChatWxToDevice.objects.filter(create_time__gt=sync_datetime, device_id=status.device_id, message_type='0').order_by("create_time")[:VOICE_COUNT_ONEQUERY])#message_type = Voice
-				logger.debug("query count is %d" % queryset.count())
 				ret_dict = {}
 				ret_dict["senders_weixin"]=[]
 				ret_dict["senders_userId"]=[]
