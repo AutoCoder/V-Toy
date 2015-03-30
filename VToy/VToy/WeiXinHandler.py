@@ -61,12 +61,11 @@ class WeiXinHandler:
                 if msg["Event"] == 'bind':
                     pass
                 elif msg["Event"] == 'subscribe_status':
-                    # create subscriptionInfo item in db
-                    # 
-                    pass
+                    # create/update subscriptionInfo item in db
+                    DBWrapper.updateSubscriptionStatus(deviceId=msg["DeviceID"], wxOpenId=msg["OpenID"], wxmpId=msg["DeviceType"], opType=True)
                 elif msg["Event"] == 'unsubscribe_status':
                     # modified the subscription item'status in db
-                    pass
+                    DBWrapper.updateSubscriptionStatus(deviceId=msg["DeviceID"], wxOpenId=msg["OpenID"], wxmpId=msg["DeviceType"], opType=False)
                 elif msg["Event"] == 'unbind':
                     pass
             else:
