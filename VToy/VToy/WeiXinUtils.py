@@ -303,10 +303,9 @@ class WeiXinUtils:
             }
             logger.debug(postData)
             r = requests.post("https://api.weixin.qq.com/cgi-bin/message/custom/send", params=url_params, data=json.dumps(postData))
-            #resp_json = r.json()
-            #logger.debug(r.text)
-            logger.debug(r.content)
-            return True, None
+            resp_json = r.json()
+            logger.debug(resp_json)
+            return (resp_json["errcode"] == 0), resp_json["errmsg"]
         except Exception,info:
             return False, info
 
