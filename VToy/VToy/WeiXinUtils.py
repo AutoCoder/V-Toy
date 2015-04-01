@@ -349,6 +349,26 @@ class WeiXinUtils:
         return r.json()
 
     @staticmethod
+    def updateDeviceStatus(openId, deviceId, wxMpId, deviceStatus, msgType=2):
+        try:
+            postData = {
+                "device_type" : wxMpId,
+                "device_id" : deviceId,
+                "open_id" : openId,
+                "msg_type" : msgType,
+                "device_status" : (1 if deviceStatus else 0)
+                }
+            } 
+            url_params = {
+                "access_token" : WeiXinUtils.getaccesstoken(),
+            }
+            r = requests.post("https://api.weixin.qq.com/device/transmsg", params=url_params, data=json.dumps(postData))
+            resp_json = r.json()
+            return (resp_json["ret"] == 0), resp_json["ret_info"]
+        except Exception,info:
+            return False, info
+
+    @staticmethod
     def DeviceInfo(devId="001",mac="123456789ABC",connect_protocol="4", \
         auth_key='',close_strategy='1',conn_strategy='1', \
         crypt_method='0', auth_ver='0',manu_mac_pos='-1',ser_mac_pos='-2'):

@@ -1,7 +1,7 @@
 from models import ChatWxToDevice, ChatDeviceToWx, VToyUser, ChatVoices, DeviceStatus, DeviceInfo, SubscriptionInfo
 from Public.Utils import utcdatetime2utctimestamp, utctimestamp2utcdatetime
 from Public.Error import DBError
-from Public.DeviceSettings import VOICE_COUNT_ONEQUERY
+from Public.DeviceSettings import VOICE_COUNT_ONEQUERY, HEARTBEAT_FREQ
 import logging
 
 logger = logging.getLogger('consolelogger')
@@ -246,3 +246,17 @@ class DBWrapper:
 		except DeviceStatus.DoesNotExist:
 			return False, "No device status for %s existed." % macAddress
 
+	@staticmethod
+	def heartbeatFactroy():
+		try:
+			from datetime import datetime, timedelta
+			for item in DeviceStatus.objects.all():
+				bool isLive = False;
+				# '1' mean alive
+				if item.status == '1' and (datetime.now() - timedelta(seconds=HEARTBEAT_FREQ)) < item.update_time: 
+					isLive = True
+
+				for sub_item in SubscriptionInfo.objects.filter(device_id=item.device_id):
+					yield (sub_item.wx_user, sub_item.device_id, sub_item.wx_mp_id, isLive)
+		except Exception,info:
+			print info
