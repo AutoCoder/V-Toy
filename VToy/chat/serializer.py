@@ -251,7 +251,7 @@ class DBWrapper:
 		try:
 			from datetime import datetime, timedelta
 			for item in DeviceStatus.objects.all():
-				bool isLive = False;
+				isLive = False;
 				# '1' mean alive
 				if item.status == '1' and (datetime.now() - timedelta(seconds=HEARTBEAT_FREQ)) < item.update_time: 
 					isLive = True

@@ -43,6 +43,7 @@ INSTALLED_APPS = (
      'django.contrib.messages',
      'django.contrib.staticfiles',
      'chat',
+     'Tools',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -82,7 +83,7 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'vtoy',
             'USER': 'root',
-            'PASSWORD': 'vtoyvtoy',
+            'PASSWORD': 'wodemima',
             'HOST': '121.40.99.4',
             'PORT': '3306'
         }

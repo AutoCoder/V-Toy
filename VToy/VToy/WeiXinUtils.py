@@ -356,8 +356,7 @@ class WeiXinUtils:
                 "device_id" : deviceId,
                 "open_id" : openId,
                 "msg_type" : msgType,
-                "device_status" : (1 if deviceStatus else 0)
-                }
+                "device_status" : (1 if deviceStatus else 0),
             } 
             url_params = {
                 "access_token" : WeiXinUtils.getaccesstoken(),
