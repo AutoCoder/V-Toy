@@ -59,19 +59,18 @@ class WeiXinHandler:
                 return WeiXinHandler.replyTextForMsg(msg, text)
             elif msg["MsgType"] == "device_event":
                 if msg["Event"] == 'bind':
-                    pass
+                    logger.debug('bind')
                 elif msg["Event"] == 'subscribe_status':
                     # create/update subscriptionInfo item in db
                     DBWrapper.updateSubscriptionStatus(deviceId=msg["DeviceID"], wxOpenId=msg["OpenID"], wxmpId=msg["DeviceType"], opType=True)
                     info = WeiXinHandler.replySubscribeRequest(msg)
-                    logger.debug(info)
                     return info
 
                 elif msg["Event"] == 'unsubscribe_status':
                     # modified the subscription item'status in db
                     DBWrapper.updateSubscriptionStatus(deviceId=msg["DeviceID"], wxOpenId=msg["OpenID"], wxmpId=msg["DeviceType"], opType=False)       
                 elif msg["Event"] == 'unbind':
-                    pass
+                    logger.debug('unbind')
             else:
                 return WeiXinHandler.replyTextForMsg(msg, 'testing vtoy for other MsgType...')
         except Exception, debuginfo:
@@ -195,7 +194,7 @@ class WeiXinHandler:
 
     @staticmethod
     def replySubscribeRequest(msg):
-        is_alive, errInfo = DBWrapper.IsAlive(msg['deviceId'])
+        is_alive, errInfo = DBWrapper.IsAlive(msg['DeviceID'])
         c = Context({
             'ToUserName' : msg['FromUserName'],
             'FromUserName': msg['ToUserName'],
@@ -205,7 +204,6 @@ class WeiXinHandler:
             'deviceId' : msg['DeviceID'],
             'StatusCode' : (1 if is_alive else 0)
             })
-
         fp = open(TEMPLATE_DIR + '/response_subscribe_templ')
         t = Template(fp.read())
         fp.close()
