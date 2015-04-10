@@ -63,9 +63,11 @@ class WeiXinHandler:
                 elif msg["Event"] == 'subscribe_status':
                     # create/update subscriptionInfo item in db
                     DBWrapper.updateSubscriptionStatus(deviceId=msg["DeviceID"], wxOpenId=msg["OpenID"], wxmpId=msg["DeviceType"], opType=True)
+                    return WeiXinHandler.replySubscribeRequest(msg)
+                    
                 elif msg["Event"] == 'unsubscribe_status':
                     # modified the subscription item'status in db
-                    DBWrapper.updateSubscriptionStatus(deviceId=msg["DeviceID"], wxOpenId=msg["OpenID"], wxmpId=msg["DeviceType"], opType=False)
+                    DBWrapper.updateSubscriptionStatus(deviceId=msg["DeviceID"], wxOpenId=msg["OpenID"], wxmpId=msg["DeviceType"], opType=False)       
                 elif msg["Event"] == 'unbind':
                     pass
             else:
@@ -187,9 +189,31 @@ class WeiXinHandler:
 
     @staticmethod
     def handleBindMsg(msg):
-
         logger.debug("handleBindMsg success")
-            
+
+    @staticmethod
+    def replySubscribeRequest(msg):
+        is_alive, errInfo = DBWrapper.IsAlive(msg['deviceId'])
+        c = Context({
+            'ToUserName' : msg['FromUserName'],
+            'FromUserName': msg['ToUserName'],
+            'createTime': str(int(time.time())),
+            'msgType' : 'device_status',
+            'deviceType' : msg['DeviceType'],
+            'deviceId' : msg['DeviceID'],
+            'StatusCode' : (1 if is_alive else 0)
+            })
+
+        fp = open(TEMPLATE_DIR + '/response_subscribe_templ')
+        t = Template(fp.read())
+        fp.close()
+
+        if errInfo:
+            logger.debug(errInfo)
+
+        return t.render(c)
+
+
 def test_authorizedevice():  
     Devicelist = dict()
     Devicelist["device_num"] = '1'
@@ -201,5 +225,5 @@ def test_authorizedevice():
     print WeiXinUtils.authorizeDevice(Devicelist)
 
 # Create your tests here.
-test_authorizedevice()
-# print WeiXinHandler.queryDeviceStatus('gh_2fb6f6563f31_e16733450c242d9315327c185d9150ca')
+#test_authorizedevice()
+

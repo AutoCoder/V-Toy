@@ -251,12 +251,26 @@ class DBWrapper:
 		try:
 			from datetime import datetime, timedelta
 			for item in DeviceStatus.objects.all():
-				isLive = False;
+				is_alive = False;
 				# '1' mean alive
 				if item.status == '1' and (datetime.now() - timedelta(seconds=HEARTBEAT_FREQ)) < item.update_time: 
-					isLive = True
+					is_alive = True
 
 				for sub_item in SubscriptionInfo.objects.filter(device_id=item.device_id):
-					yield (sub_item.wx_user, sub_item.device_id, sub_item.wx_mp_id, isLive)
+					yield (sub_item.wx_user, sub_item.device_id, sub_item.wx_mp_id, is_alive)
 		except Exception,info:
 			print info
+
+	@staticmethod
+	def IsAlive(deviceId):
+		from datetime import datetime, timedelta
+		try:
+			item = DeviceStatus.objects.get(device_id=deviceId)
+			is_alive = False;
+			# '1' mean alive
+			if item.status == '1' and (datetime.now() - timedelta(seconds=HEARTBEAT_FREQ)) < item.update_time: 
+				is_alive = True
+
+			return is_alive, None
+		except DeviceStatus.DoesNotExist:
+			return False, "No device status for %s existed." % deviceId

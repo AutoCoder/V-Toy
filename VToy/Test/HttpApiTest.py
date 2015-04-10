@@ -4,7 +4,7 @@ import json
 
 def downloadQRImage():
 	post_data = {
-		"mac" : "123456789ABC",
+		"mac" : "201504109AAA",
 	}
 	r = requests.post("http://121.40.99.4/vtoy/qrimage/", data=post_data)
 
@@ -41,7 +41,7 @@ def sendMsgFromDevice():
 	print r.content
 
 
-# downloadQRImage()
+downloadQRImage()
 # downloadvoice()
 # getUnsyncedMessage()
-sendMsgFromDevice()
+# sendMsgFromDevice()

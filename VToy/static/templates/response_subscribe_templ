@@ -1,0 +1,9 @@
+<xml>
+	<ToUserName><![CDATA[ {{ToUserName}}]]></ToUserName>
+	<FromUserName><![CDATA[{{FromUserName}}]]></FromUserName> 
+	<CreateTime>{{ createTime }}</CreateTime>
+	<MsgType><![CDATA[{{ msgType }}]]></MsgType>
+	<DeviceType><![CDATA[{{ deviceType }}]]></DeviceType>
+	<DeviceID><![CDATA[{{ deviceId }}]]></DeviceID>
+	<DeviceStatus>{{ StatusCode }}</DeviceStatus> 
+</xml>
