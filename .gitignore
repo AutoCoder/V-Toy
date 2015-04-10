@@ -48,3 +48,6 @@ Temporary Items
 #eclipse project file
 *.project
 *.pydevproject
+
+#qr image
+*.png
