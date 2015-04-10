@@ -27,7 +27,7 @@ class DeviceHttpHandler:
                 devicelogger.debug(response)
                 if noexception:
                     # heartbeat : update the device status = alive
-                    DBWrapper.heartBeat(mac)
+                    DBWrapper.heartBeat(post_json["mac"])
                     # Implemtation:
                     # 1) query devicestatus, update update_time and status
                     # 2) if no devicestatus object found, query deviceInfo by mac, and then create an new devicestatus 
