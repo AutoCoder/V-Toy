@@ -39,7 +39,7 @@ def amr2wav(amrfile, wavfile):
 	2rd parameter is output file
 	"""
 	if os.path.exists(amrfile):
-		cmd = "ffmpeg -i %s %s" % (amrfile, wavfile)
+		cmd = "ffmpeg -i %s -acodec adpcm_ima_wav %s" % (amrfile, wavfile)
 		return (os.system(cmd) == 0), wavfile
 	else:
 		return False, "amr file is not existed, please check the file path"
