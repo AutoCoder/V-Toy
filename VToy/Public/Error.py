@@ -71,6 +71,16 @@ class HttpRequestError:
         ret["errmsg"] = "please pass keys '%s' by POST FORM" % keysstr
         return ret
 
+class WxmpError:
+
+    @staticmethod
+    def OutOfTimeLimit():
+        ret = {}
+        ret["errcode"] = 30
+        ret["errmsg"] = "[Customer Service API] response out of time limit or subscription is canceled"
+        return ret
+
+
 # print HttpRequestError.PostJsonKeyMissing("weq","fes","fsdf")
 # print HttpRequestError.PostFormKeyMissing("weq","fes","fsdf")
 

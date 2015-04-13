@@ -5,7 +5,7 @@ from WeiXinUtils import WeiXinUtils
 from chat.serializer import DBWrapper
 from WeixinSettings import MP_ID
 from Public.Utils import wav2amr
-from Public.Error import HttpRequestError, ExternalToolError, CompositeError
+from Public.Error import HttpRequestError, ExternalToolError, WxmpError, CompositeError
 
 devicelogger = logging.getLogger('consolelogger')
 
@@ -95,6 +95,8 @@ class DeviceHttpHandler:
                     if isSuccess:
                         ret = { "is_posted" : 1 }
                         return HttpResponse(json.dumps(ret))
+                    else:
+                        return HttpResponse(json.dumps(WxmpError.OutOfTimeLimit()))
                 else: # upload media fail
                     errmsg = "[dberrInfo] %s ; [uploaderrInfo] %s " % (dberrInfo, uploaderrInfo)
                     return HttpResponse(json.dumps(CompositeError(errmsg)))

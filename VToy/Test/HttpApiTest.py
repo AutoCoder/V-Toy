@@ -31,7 +31,7 @@ def getUnsyncedMessage():
 
 def sendMsgFromDevice():
 	headers = {
-		'MAC': '3332553390AB',
+		'MAC': '201504109AAA',
 		'USERNAME' : 'o2lw_t7-SnZTALxfBY-Q4JLskikc',
 		'WEIXINID' : 'o2lw_t7-SnZTALxfBY-Q4JLskikc',
 		'FORMAT' : 'wav'
@@ -41,7 +41,7 @@ def sendMsgFromDevice():
 	print r.content
 
 
-downloadQRImage()
+# downloadQRImage()
 # downloadvoice()
 # getUnsyncedMessage()
-# sendMsgFromDevice()
+sendMsgFromDevice()
